@@ -1,0 +1,135 @@
+---
+title: "TypeScript SDK"
+description: "Use the official @crevio/sdk to interact with the Crevio API"
+---
+
+The `@crevio/sdk` package provides a type-safe TypeScript client for the Crevio API. It works in Node.js, browsers, Cloudflare Workers, and Deno.
+
+## Installation
+
+<CodeGroup>
+```bash npm
+npm install @crevio/sdk
+```
+
+```bash bun
+bun add @crevio/sdk
+```
+
+```bash pnpm
+pnpm add @crevio/sdk
+```
+</CodeGroup>
+
+## Quick start
+
+```typescript
+import { Crevio } from "@crevio/sdk";
+
+const crevio = new Crevio({
+  security: {
+    apiKey: "YOUR_API_TOKEN",
+  },
+});
+```
+
+## Usage examples
+
+### List products
+
+```typescript
+const { items } = await crevio.products.list();
+
+for (const product of items) {
+  console.log(product.name, product.prefixId);
+}
+```
+
+### Get a product
+
+```typescript
+const product = await crevio.products.get({
+  prefixId: "prd_abc123",
+});
+```
+
+### Create a checkout
+
+```typescript
+const checkout = await crevio.checkouts.create({
+  checkout: {
+    checkoutItemsAttributes: [
+      {
+        priceVariantId: 1,
+        quantity: 1,
+      },
+    ],
+  },
+});
+```
+
+### List orders with expanded data
+
+```typescript
+const { items, pagination } = await crevio.orders.list({
+  expand: "line_items,customer",
+  page: 1,
+  limit: 50,
+});
+```
+
+### Create a customer
+
+```typescript
+const customer = await crevio.customers.create({
+  customer: {
+    email: "customer@example.com",
+    firstName: "Jane",
+    lastName: "Doe",
+  },
+});
+```
+
+### Create a discount
+
+```typescript
+const discount = await crevio.discounts.create({
+  discount: {
+    code: "SUMMER20",
+    discountType: "percent_off",
+    percentOff: 20,
+    duration: "once",
+    maxRedemptions: 100,
+  },
+});
+```
+
+## Error handling
+
+The SDK throws typed errors that you can catch:
+
+```typescript
+try {
+  const product = await crevio.products.get({
+    prefixId: "prd_nonexistent",
+  });
+} catch (error) {
+  if (error.statusCode === 404) {
+    console.log("Product not found");
+  }
+}
+```
+
+## Runtime support
+
+| Runtime | Supported |
+|---------|-----------|
+| Node.js 18+ | Yes |
+| Browsers | Yes |
+| Cloudflare Workers | Yes |
+| Deno | Yes |
+| Bun | Yes |
+
+<Note>
+  The SDK is generated with [Speakeasy](https://speakeasy.com) and includes Zod validation, automatic retries, and full TypeScript type definitions.
+</Note>

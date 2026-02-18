@@ -1,170 +1,171 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Crevio",
-  "colors": {
-    "primary": "#171717",
-    "light": "#737373",
-    "dark": "#0A0A0A"
-  },
-  "favicon": "/favicon.ico",
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Introduction",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "introduction/getting-started",
-              "introduction/how-crevio-works"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Features",
-        "groups": [
-          {
-            "group": "Selling",
-            "pages": [
-              "features/products",
-              "features/pricing",
-              "features/checkout",
-              "features/discounts",
-              "features/invoices"
-            ]
-          },
-          {
-            "group": "Content",
-            "pages": [
-              "features/experiences",
-              "features/blog",
-              "features/storefront"
-            ]
-          },
-          {
-            "group": "Management",
-            "pages": [
-              "features/customers",
-              "features/orders",
-              "features/team",
-              "features/analytics"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Integrations",
-        "groups": [
-          {
-            "group": "Payment",
-            "pages": [
-              "integrations/stripe"
-            ]
-          },
-          {
-            "group": "Community",
-            "pages": [
-              "integrations/discord",
-              "integrations/telegram"
-            ]
-          },
-          {
-            "group": "Developer",
-            "pages": [
-              "integrations/webhooks",
-              "integrations/custom-domain",
-              "integrations/api-overview"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Tips & Tricks",
-        "groups": [
-          {
-            "group": "Guides",
-            "pages": [
-              "tips/boost-sales",
-              "tips/content-delivery",
-              "tips/seo",
-              "tips/automation"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Changelog",
-        "groups": [
-          {
-            "group": "Updates",
-            "pages": [
-              "changelog/index"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          }
-        ],
-        "openapi": "api-reference/openapi.json"
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "App",
-          "href": "https://app.crevio.co",
-          "icon": "arrow-up-right-from-square"
-        },
-        {
-          "anchor": "Support",
-          "href": "mailto:support@crevio.co",
-          "icon": "envelope"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:support@crevio.co"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.crevio.co"
-    }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "cursor",
-      "vscode"
-    ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/caborevio",
-      "github": "https://github.com/crevio"
-    }
-  }
+	"$schema": "https://mintlify.com/docs.json",
+	"theme": "mint",
+	"name": "Crevio",
+	"colors": {
+		"primary": "#171717",
+		"light": "#737373",
+		"dark": "#0A0A0A"
+	},
+	"favicon": "/favicon.ico",
+	"navigation": {
+		"products": [
+			{
+				"product": "For Creators",
+				"icon": "palette",
+				"tabs": [
+					{
+						"tab": "Introduction",
+						"groups": [
+							{
+								"group": "Getting started",
+								"pages": [
+									"index",
+									"introduction/getting-started",
+									"introduction/how-crevio-works"
+								]
+							}
+						]
+					},
+					{
+						"tab": "Features",
+						"groups": [
+							{
+								"group": "Selling",
+								"pages": [
+									"features/products",
+									"features/pricing",
+									"features/checkout",
+									"features/discounts",
+									"features/invoices"
+								]
+							},
+							{
+								"group": "Content",
+								"pages": [
+									"features/experiences",
+									"features/blog",
+									"features/storefront"
+								]
+							},
+							{
+								"group": "Management",
+								"pages": [
+									"features/customers",
+									"features/orders",
+									"features/team",
+									"features/analytics"
+								]
+							}
+						]
+					},
+					{
+						"tab": "Integrations",
+						"groups": [
+							{
+								"group": "Payment",
+								"pages": ["integrations/stripe"]
+							},
+							{
+								"group": "Community",
+								"pages": ["integrations/discord", "integrations/telegram"]
+							},
+							{
+								"group": "Advanced",
+								"pages": ["integrations/custom-domain"]
+							}
+						]
+					},
+					{
+						"tab": "Tips & Tricks",
+						"groups": [
+							{
+								"group": "Guides",
+								"pages": [
+									"tips/boost-sales",
+									"tips/content-delivery",
+									"tips/seo",
+									"tips/automation"
+								]
+							}
+						]
+					},
+					{
+						"tab": "Changelog",
+						"groups": [
+							{
+								"group": "Updates",
+								"pages": ["changelog/index"]
+							}
+						]
+					}
+				]
+			},
+			{
+				"product": "For Developers",
+				"icon": "code",
+				"tabs": [
+					{
+						"tab": "Guides",
+						"groups": [
+							{
+								"group": "Getting started",
+								"pages": [
+									"developer/index",
+									"developer/guides/api-overview",
+									"developer/guides/sdk"
+								]
+							},
+							{
+								"group": "Integrations",
+								"pages": ["developer/guides/webhooks"]
+							}
+						]
+					},
+					{
+						"tab": "API Reference",
+						"groups": [
+							{
+								"group": "Overview",
+								"pages": ["developer/api-reference/introduction"]
+							},
+							{
+								"group": "Endpoints",
+								"openapi": {
+									"source": "developer/api-reference/openapi.json",
+									"directory": "developer/api-reference"
+								}
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	"logo": {
+		"light": "/logo/light.svg",
+		"dark": "/logo/dark.svg"
+	},
+	"navbar": {
+		"links": [
+			{
+				"label": "Support",
+				"href": "mailto:support@crevio.co"
+			}
+		],
+		"primary": {
+			"type": "button",
+			"label": "Dashboard",
+			"href": "https://crevio.co/app/dashboard"
+		}
+	},
+	"contextual": {
+		"options": ["copy", "view", "chatgpt", "claude", "cursor", "vscode"]
+	},
+	"footer": {
+		"socials": {
+			"x": "https://x.com/crevioapp",
+			"github": "https://github.com/creviolabs"
+		}
+	}
 }
