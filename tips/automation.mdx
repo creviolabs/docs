@@ -1,0 +1,76 @@
+---
+title: "Automation"
+description: "Automate your workflows with webhooks, the API, and built-in integrations"
+---
+
+## Webhook-powered workflows
+
+[Webhooks](/integrations/webhooks) let you react to events in real time. When something happens in Crevio, your server gets notified.
+
+### Common automations
+
+| Event | Automation idea |
+|-------|-----------------|
+| `order.paid` | Send a custom welcome email, add to your CRM, or trigger a Slack notification |
+| `customer.created` | Add the customer to your email marketing tool |
+| `invoice.past_due` | Send a reminder or flag the account in your system |
+| `product.updated` | Sync product data to your external storefront |
+
+<Tip>
+  Use a service like Zapier or Make to connect Crevio webhooks to thousands of other apps without writing code.
+</Tip>
+
+## API automation
+
+The [Crevio API](/integrations/api-overview) lets you programmatically manage your store:
+
+- **Bulk customer creation** -- import customers from another platform
+- **Dynamic pricing** -- update price variants based on external factors
+- **Order reporting** -- pull order data into your own analytics system
+- **Automated discounts** -- create and manage discount codes programmatically
+
+```typescript
+import { Crevio } from "@crevio/sdk";
+
+const crevio = new Crevio({
+  security: { apiKey: "YOUR_API_TOKEN" },
+});
+
+// Create a time-limited discount
+await crevio.discounts.create({
+  discount: {
+    code: "FLASH50",
+    discountType: "percent_off",
+    percentOff: 50,
+    maxRedemptions: 100,
+    redeemBy: "2026-03-01T00:00:00Z",
+  },
+});
+```
+
+## Discord and Telegram auto-management
+
+Both integrations run automatically once configured:
+
+### Discord
+- **On purchase**: Customer is added to your server and assigned the configured role
+- **On cancellation**: The configured action runs (remove role, kick, etc.)
+- No manual member management needed
+
+### Telegram
+- **On purchase**: Customer receives an invite link via the Crevio bot
+- **On cancellation**: Customer is removed or banned based on your settings
+
+<Note>
+  Both integrations require the customer to connect their account via OAuth. Prompt them during onboarding or on their order confirmation page.
+</Note>
+
+## Scheduled publishing
+
+Use the blog's [scheduled publishing](/features/blog#scheduled-publishing) to maintain a consistent content cadence:
+
+1. Write multiple blog posts in advance
+2. Set each one to publish at a specific date and time
+3. Crevio automatically publishes them on schedule
+
+This keeps your storefront fresh and helps with SEO without requiring you to be online at publish time.
