@@ -1,0 +1,139 @@
+---
+title: "How Crevio works"
+description: "Understand the core concepts behind Crevio -- accounts, products, experiences, pricing, and the customer journey."
+---
+
+Crevio is built around a simple idea: creators should be able to sell anything digital without stitching together a dozen different tools. This page explains how the platform is structured and how the pieces fit together.
+
+## Core concepts
+
+<AccordionGroup>
+  <Accordion title="Accounts">
+    An **account** represents your store or brand on Crevio. Everything -- products, customers, orders, experiences -- belongs to an account.
+
+    Each account gets a free subdomain (e.g., `yourname.crevio.site`) that serves as a public storefront. You can also connect a custom domain.
+
+    Accounts support team collaboration. You can invite team members with admin or member roles to help manage your store.
+  </Accordion>
+  <Accordion title="Products">
+    A **product** is what you sell. It has a name, description, media (images, videos), and one or more price variants. Products go through a lifecycle: **Draft** (work in progress), **Active** (published and available), or **Archived** (hidden from your store).
+
+    A product must have at least one price variant and be set to Active before it can appear on your storefront.
+  </Accordion>
+  <Accordion title="Price variants">
+    A **price variant** defines how much a product costs and how it is billed. A single product can have multiple price variants to offer different pricing tiers.
+
+    Price variants support:
+    - **Free** -- No charge
+    - **Fixed one-time** -- A single payment (e.g., $49)
+    - **Fixed subscription** -- Recurring billing (daily, weekly, monthly, quarterly, semi-annual, or annual)
+    - **Pay what you want** -- Customer chooses a price within a range you set
+
+    Each price variant can also have optional settings like trial periods, limited inventory, seat-based bundles, benefits lists, and access revocation after a set number of days.
+  </Accordion>
+  <Accordion title="Experiences">
+    An **experience** is what the customer gets access to after purchasing. Experiences are attached to price variants, so different pricing tiers can unlock different content.
+
+    Think of it this way: the **product** is what you sell, and the **experience** is what you deliver.
+
+    See the [full list of experience types](#experience-types) below.
+  </Accordion>
+  <Accordion title="Customers">
+    A **customer** is anyone who interacts with your store. Customers fall into three categories:
+    - **Lead** -- Someone who has provided their email (e.g., through a lead magnet) but has not created an account
+    - **Free** -- A registered user who has not made a paid purchase
+    - **Paid** -- A registered user who has completed at least one paid order
+
+    You can tag customers, track their order history, and manage their experience access from your dashboard.
+  </Accordion>
+  <Accordion title="Orders">
+    An **order** is created when a customer completes a checkout. It records the payment details, the products purchased, and the experiences granted.
+
+    Orders can have the following statuses: **Succeeded**, **Pending**, **Failed**, **Refunded**, **Partially refunded**, or **Disputed**.
+
+    When an order succeeds, Crevio automatically grants the customer access to the experiences attached to the purchased price variants.
+  </Accordion>
+</AccordionGroup>
+
+## The customer journey
+
+Here is how it all connects, from product creation to customer access:
+
+<Steps>
+  <Step title="Create a product">
+    You create a product with a name, description, and media. This is the listing customers will see.
+  </Step>
+  <Step title="Create experiences">
+    You create the experiences you want to deliver -- a course, a set of downloadable files, a Discord server invite, or any combination.
+  </Step>
+  <Step title="Set up price variants">
+    You add one or more price variants to your product (e.g., a $29/month subscription and a $249 lifetime access option). Each price variant is linked to one or more experiences.
+  </Step>
+  <Step title="Customer checks out">
+    A customer visits your storefront or follows a direct checkout link. They select a price variant, enter their payment details through the Stripe-powered checkout, and complete the purchase.
+  </Step>
+  <Step title="Access is granted">
+    Crevio automatically creates an order and grants the customer access to the experiences associated with their chosen price variant. They can log in and access their content immediately.
+  </Step>
+</Steps>
+
+## Experience types
+
+Experiences are the building blocks of what you deliver to customers. You can attach multiple experiences to a single price variant to create product bundles.
+
+| Experience | Description |
+|---|---|
+| **Course** | A structured learning experience with chapters and lessons. Supports video, text, and file attachments. Track student progress and offer completion certificates. |
+| **Digital download** | Files your customers can download after purchase. Upload any file type -- PDFs, ZIP archives, templates, presets, and more. |
+| **Written content** | Rich-text articles or guides delivered through the Crevio content viewer. Great for tutorials, playbooks, or exclusive written content. |
+| **Discord server** | Automatically grant and revoke access to a Discord server or specific roles. Useful for paid communities and support channels. |
+| **Telegram group** | Manage paid access to a Telegram group or channel. Members are added on purchase and removed on cancellation or refund. |
+| **Event** | Live or scheduled events with session management. Sell access to webinars, workshops, or virtual meetups. |
+| **Forum** | A community discussion space hosted on Crevio. Customers can create posts, comment, and interact with each other. |
+| **Link** | A simple redirect to an external URL. Use this to grant access to third-party tools, resources, or private pages. |
+| **Website embed** | Embed an external website or application within the Crevio content viewer using an iframe. |
+
+<Tip>
+  You can mix and match experiences freely. For example, a single product could include a course, a Discord community, and a set of downloadable templates -- all delivered automatically on purchase.
+</Tip>
+
+## Your storefront
+
+Every Crevio account comes with a link-in-bio style storefront at `yourname.crevio.site`. This is a customizable page where you can showcase your products, add text and media blocks, display FAQs, and link to your social profiles.
+
+Your storefront acts as the central hub for your digital business. Share the link in your social bios, email signatures, and content to drive customers to your products.
+
+You can also connect a [custom domain](/integrations/custom-domain) to serve your storefront from your own URL.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Products"
+    icon="box"
+    href="/features/products"
+  >
+    Learn how to create, configure, and manage products.
+  </Card>
+  <Card
+    title="Experiences"
+    icon="sparkles"
+    href="/features/experiences"
+  >
+    Dive deeper into each experience type and how to set them up.
+  </Card>
+  <Card
+    title="Pricing"
+    icon="tags"
+    href="/features/pricing"
+  >
+    Explore advanced pricing options like trials, discounts, and pay-what-you-want.
+  </Card>
+  <Card
+    title="Connect Stripe"
+    icon="stripe"
+    href="/integrations/stripe"
+  >
+    Set up Stripe to start accepting payments.
+  </Card>
+</CardGroup>

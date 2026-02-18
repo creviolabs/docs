@@ -1,0 +1,100 @@
+---
+title: "Checkout"
+description: "Understand how buyers purchase your products through Crevio's checkout flow"
+---
+
+Crevio provides a streamlined checkout experience powered by Stripe's custom UI mode. Buyers complete their purchase without leaving your storefront, keeping the experience on-brand and distraction-free.
+
+## How checkout works
+
+<Steps>
+<Step title="Buyer adds items">
+  A buyer selects a price variant on your product page, or clicks a checkout link you have shared. This creates a checkout session with the selected items.
+</Step>
+
+<Step title="Payment details">
+  For paid products, Stripe's embedded payment form collects the buyer's card details, billing information, and any applicable tax. The form renders directly within your storefront -- buyers are never redirected to a third-party page.
+</Step>
+
+<Step title="Discount codes">
+  If you have created [discount codes](/features/discounts), buyers can enter them during checkout to reduce the total.
+</Step>
+
+<Step title="Order completion">
+  Once payment succeeds, Crevio creates an order, grants the buyer access to the purchased experiences, and sends a confirmation.
+</Step>
+</Steps>
+
+<Note>
+  Crevio determines the checkout mode automatically based on the items in the cart. If any item is a subscription, the checkout runs in **subscription** mode. Otherwise, it runs in **one-time payment** mode. You cannot mix subscription and one-time items in a single checkout.
+</Note>
+
+## Checkout links
+
+Checkout links are shareable URLs that take a buyer directly to a pre-configured checkout. Instead of sending someone to your storefront and asking them to find the product, you give them a link that starts the purchase flow immediately.
+
+Each checkout link:
+- Contains one or more pre-selected price variants
+- Generates a **QR code** automatically, which you can download and embed in presentations, print materials, or social posts
+- Can optionally have a **discount code** pre-applied
+- Can include a **custom success URL** that the buyer is redirected to after purchase
+
+<Tip>
+  Checkout links are great for promotions, email campaigns, and social media CTAs. Share a single URL and the buyer lands straight on the payment step.
+</Tip>
+
+### Checkout link rules
+
+- A checkout link must include at least one price variant.
+- You can only include one price variant per product in a link.
+- You cannot mix subscription and one-time variants in the same link.
+- Only one subscription variant is allowed per link.
+
+## Shopping carts
+
+Buyers browsing your storefront can add multiple products to a shopping cart before checking out. The cart:
+
+- Supports multiple items with individual quantities
+- Shows the total across all items
+- Tracks the buyer by session (anonymous) or by customer account (logged in)
+- Merges automatically when a session-based cart is associated with a logged-in customer
+
+When a buyer proceeds to checkout from their cart, Crevio creates a checkout session containing all cart items.
+
+<Note>
+  All items in a cart must use the same currency. If a buyer tries to add items with different currencies, the checkout will not proceed.
+</Note>
+
+## Free checkout
+
+If every item in a checkout has a free price variant, Crevio skips the Stripe payment flow entirely. The buyer completes the checkout without entering any payment information, and you do not need a connected Stripe account for free-only products.
+
+This is useful for:
+- Lead magnets and email list builders
+- Free community access
+- Gated content that requires sign-up but no payment
+
+## Checkout states
+
+Every checkout session moves through one of these states:
+
+| State | Description |
+|-------|-------------|
+| **Open** | The checkout has been created and the buyer is actively completing it. |
+| **Complete** | Payment succeeded (or the checkout was free) and an order has been created. |
+| **Abandoned** | The buyer left without completing payment. This happens when a new checkout replaces a previous one from the same cart. |
+| **Expired** | The Stripe session expired before the buyer completed payment. Stripe sessions have a built-in expiration window. |
+
+## Pre-filled email
+
+When a checkout is created from an [invoice](/features/invoices), the buyer's email address is pre-filled from the invoice record. This saves the buyer a step and reduces friction for invoice-initiated purchases.
+
+## Discount codes at checkout
+
+Buyers can enter a discount code during the checkout flow. The discount is validated in real-time -- Crevio checks that the code is active, has not exceeded its redemption limit, has not expired, and (if applicable) targets the specific price variant in the checkout.
+
+See [Discounts](/features/discounts) for details on creating and managing discount codes.
+
+## Cross-sell recommendations
+
+During checkout, Crevio can display **cross-sell product recommendations** based on the items already in the buyer's cart. These are configured at the [price variant](/features/pricing) level and encourage buyers to add complementary products before completing their purchase.

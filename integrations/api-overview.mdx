@@ -1,0 +1,201 @@
+---
+title: "API overview"
+description: "Integrate Crevio into your own applications with the REST API."
+---
+
+The Crevio API lets you programmatically manage your account's products, orders, customers, checkouts, and more. Use it to build custom storefronts, sync data with external systems, or automate workflows.
+
+## What you can do with the API
+
+- **Products** -- Create, update, list, and retrieve products and price variants.
+- **Orders** -- List and retrieve order details.
+- **Customers** -- List, retrieve, and manage customer records.
+- **Checkouts** -- Create checkout sessions and retrieve checkout details.
+- **Checkout links** -- Create and manage shareable checkout links.
+- **Experiences** -- List and retrieve experiences and their content.
+- **Discounts** -- Create and manage discount codes.
+- **Blog posts** -- Create and manage blog content.
+
+## Authentication
+
+All API requests are authenticated using **Bearer tokens**. Include your API token in the `Authorization` header of every request:
+
+```bash
+curl https://api.crevio.co/v1/products \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+Requests without a valid token receive a `401 Unauthorized` response.
+
+## Base URL
+
+All API endpoints use the following base URL:
+
+```
+https://api.crevio.co/v1
+```
+
+## Creating API tokens
+
+<Steps>
+  <Step title="Go to Developer settings">
+    In your dashboard, navigate to **Settings** > **Developer**.
+  </Step>
+  <Step title="Create a new token">
+    Click **New API token** and give it a descriptive name (e.g., "My integration" or "Storefront sync").
+  </Step>
+  <Step title="Copy the token">
+    Your token is displayed once. Copy it and store it securely. You will not be able to view it again.
+  </Step>
+</Steps>
+
+<Warning>
+  Treat API tokens like passwords. Do not commit them to version control, share them in public channels, or include them in client-side code. Store them in environment variables or a secrets manager.
+</Warning>
+
+API tokens are scoped to your account. Any request made with a token acts on behalf of the user who created it, within the context of that account.
+
+### Token management
+
+- Tokens display their **last used** timestamp so you can identify stale tokens.
+- You can delete a token at any time to revoke access immediately.
+- Each account can have multiple active tokens.
+
+## Rate limiting
+
+The API enforces rate limits to ensure fair usage and platform stability. If you exceed the rate limit, the API responds with a `429 Too Many Requests` status code. Wait for the period indicated in the response headers before retrying.
+
+<Tip>
+  Implement exponential backoff in your API client to handle rate limits gracefully. The `@crevio/sdk` handles this automatically.
+</Tip>
+
+## Pagination
+
+List endpoints return paginated results. The response includes an `items` array and a `pagination` object:
+
+```json
+{
+  "items": [
+    { "id": "prod_abc123", "name": "My Course" },
+    { "id": "prod_def456", "name": "Templates Pack" }
+  ],
+  "pagination": {
+    "page": 1,
+    "pages": 5,
+    "count": 47,
+    "limit": 10,
+    "offset": 0,
+    "from": 1,
+    "to": 10,
+    "in": 10,
+    "last": 5,
+    "next": 2,
+    "previous": null
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `page` | Current page number |
+| `pages` | Total number of pages |
+| `count` | Total number of items across all pages |
+| `limit` | Number of items per page |
+| `offset` | Number of items skipped |
+| `from` | Position of the first item on this page |
+| `to` | Position of the last item on this page |
+| `in` | Number of items on this page |
+| `last` | Last page number |
+| `next` | Next page number, or `null` if on the last page |
+| `previous` | Previous page number, or `null` if on the first page |
+
+Use the `page` query parameter to navigate between pages:
+
+```bash
+curl https://api.crevio.co/v1/products?page=2 \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+## Error format
+
+When a request fails, the API returns a JSON error response:
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "Name can't be blank",
+    "details": {
+      "name": ["can't be blank"]
+    }
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `type` | The error category (e.g., `validation_error`, `not_found`, `parameter_missing`, `error`) |
+| `message` | A human-readable description of what went wrong |
+| `details` | Field-level validation errors (included for validation errors only) |
+
+### Common error types
+
+| Type | HTTP status | Description |
+|------|-------------|-------------|
+| `validation_error` | `422` | The request body contains invalid data |
+| `not_found` | `404` | The requested resource does not exist |
+| `parameter_missing` | `400` | A required parameter is missing |
+| `error` | `500` | An unexpected server error occurred |
+
+## Full API reference
+
+For detailed documentation of every endpoint, request parameters, and response schemas, see the [API Reference](/api-reference/introduction) tab.
+
+## Available SDKs
+
+### @crevio/sdk (TypeScript)
+
+The official TypeScript SDK provides a type-safe client for the Crevio API with Zod validation, automatic retries, and support for multiple runtimes (Node.js, browsers, Cloudflare Workers, and Deno).
+
+Install it with your preferred package manager:
+
+<CodeGroup>
+```bash npm
+npm install @crevio/sdk
+```
+
+```bash bun
+bun add @crevio/sdk
+```
+
+```bash pnpm
+pnpm add @crevio/sdk
+```
+
+```bash yarn
+yarn add @crevio/sdk
+```
+</CodeGroup>
+
+Basic usage:
+
+```typescript
+import { Crevio } from "@crevio/sdk";
+
+const crevio = new Crevio({
+  bearerAuth: "YOUR_API_TOKEN",
+});
+
+// List products
+const { items, pagination } = await crevio.products.list();
+
+// Get a specific product
+const product = await crevio.products.get("prod_abc123");
+
+// Create a checkout
+const checkout = await crevio.checkouts.create({
+  priceVariantId: "pv_xyz789",
+});
+```
+
+The SDK handles authentication, pagination, error handling, and retries automatically.

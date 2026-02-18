@@ -1,0 +1,100 @@
+---
+title: "Discounts"
+description: "Create discount codes to run promotions, reward loyal customers, and boost conversions"
+---
+
+Discounts let you offer percentage or fixed-amount reductions on your products. Create codes that your buyers enter at [checkout](/features/checkout), or pre-apply them to [checkout links](#using-discounts-with-checkout-links) for a seamless promotional experience.
+
+## Creating a discount code
+
+<Steps>
+<Step title="Go to Discounts">
+  Open **Discounts** in your dashboard and click **New discount**.
+</Step>
+
+<Step title="Set the code">
+  Enter a unique code that buyers will type at checkout (e.g., `WELCOME20`, `LAUNCH50`). Codes are unique within your account and case-insensitive at checkout.
+</Step>
+
+<Step title="Choose the discount type">
+  Select whether the discount is a **percentage off** or a **fixed amount off** the price.
+</Step>
+
+<Step title="Configure duration and limits">
+  Set how long the discount lasts, how many times it can be redeemed, and when it expires. See the sections below for details on each option.
+</Step>
+
+<Step title="Optionally target specific price variants">
+  If you want the discount to apply only to certain products or tiers, select the specific price variants it targets.
+</Step>
+</Steps>
+
+## Discount types
+
+| Type | How it works | Example |
+|------|-------------|---------|
+| **Percentage off** | Reduces the price by a percentage (1% -- 100%) | `HALF` gives 50% off |
+| **Fixed amount off** | Reduces the price by a flat amount in a specific currency | `SAVE10` takes $10 off |
+
+<Note>
+  A discount can be either percentage-based or fixed-amount, not both. Fixed-amount discounts are tied to a specific currency.
+</Note>
+
+## Duration
+
+Duration controls how the discount applies over time, which matters most for subscription products.
+
+| Duration | Behavior |
+|----------|----------|
+| **Once** | The discount applies to the first payment only. For subscriptions, the buyer pays the discounted price on their first billing cycle, then full price afterward. |
+| **Repeating** | The discount applies for a set number of months. You specify **duration in months** -- the discount is active for that many billing cycles, then the subscription reverts to full price. |
+| **Forever** | The discount applies to every payment for the lifetime of the subscription (or the single payment for one-time products). |
+
+<Tip>
+  For one-time products, all three duration options behave the same since there is only one payment. Duration matters most when running promotions on subscription products.
+</Tip>
+
+## Max redemptions
+
+Set a **max redemptions** limit to cap how many times a code can be used across all buyers. Once the limit is reached, the code automatically stops working. Leave this blank for unlimited redemptions.
+
+Crevio tracks the number of times each code has been redeemed. You can see the current count on the discount's detail page.
+
+<Warning>
+  A discount that has been redeemed at least once cannot be deleted. You can deactivate it instead by changing its status to **Inactive**.
+</Warning>
+
+## Expiration dates
+
+Set a **redeem by** date to make a code expire automatically at a specific time. After the expiration date passes, the code can no longer be applied at checkout.
+
+The expiration date must be in the future when you create or update the discount.
+
+## Targeting specific price variants
+
+By default, a discount applies to any product at checkout. To narrow it down, you can target **specific price variants**. When a discount is targeted:
+
+- It only works if the buyer's checkout contains one of the targeted variants
+- It has no effect on other products or variants
+
+This is useful when you want to run a promotion on a specific tier (e.g., 20% off the annual plan) without discounting your other offerings.
+
+## Using discounts with checkout links
+
+You can pre-apply a discount to a [checkout link](/features/checkout#checkout-links). When a buyer opens the link, the discount is already applied -- they do not need to enter a code manually.
+
+This is especially effective for:
+- **Email campaigns** -- Include a checkout link with the discount baked in
+- **Social media promotions** -- Share a single URL that gives followers an instant deal
+- **Partner referrals** -- Create unique discount + checkout link combos for each partner
+
+<Note>
+  A checkout link can only have one discount applied. The discount must be in an **Active** status when the link is created or updated.
+</Note>
+
+## Discount statuses
+
+| Status | Meaning |
+|--------|---------|
+| **Active** | The code is live and can be used at checkout (subject to redemption limits and expiration). |
+| **Inactive** | The code is disabled and cannot be used at checkout. Existing subscriptions already using the discount are unaffected. |

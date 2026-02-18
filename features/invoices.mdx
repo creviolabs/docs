@@ -1,0 +1,105 @@
+---
+title: "Invoices"
+description: "Send invoices to buyers and get paid on your terms"
+---
+
+Invoices let you bill a specific person for a product without requiring them to browse your storefront. Create an invoice, choose whether to send it as a payment link or charge the buyer automatically, and track its status through to payment.
+
+## Creating an invoice
+
+<Steps>
+<Step title="Go to Invoices">
+  Open **Invoices** in your dashboard and click **New invoice**.
+</Step>
+
+<Step title="Select a price variant">
+  Choose the product and price variant you are invoicing for. The invoice amount and currency are determined by the selected variant.
+</Step>
+
+<Step title="Add buyer details">
+  Enter the buyer's **name** and **email address**, or select an existing customer from your records.
+</Step>
+
+<Step title="Set the due date">
+  Choose when payment is due. The due date must be in the future.
+</Step>
+
+<Step title="Add a description (optional)">
+  Include a custom description (up to 500 characters) with any relevant details -- what the invoice covers, payment instructions, reference numbers, etc.
+</Step>
+
+<Step title="Choose the collection method">
+  Select how you want to collect payment: **Send invoice** or **Charge automatically**.
+</Step>
+</Steps>
+
+## Collection methods
+
+### Send invoice
+
+Crevio generates a unique payment link and sends it to the buyer's email. The buyer clicks the link, completes [checkout](/features/checkout), and the invoice is marked as paid.
+
+This method is best when:
+- The buyer does not have a payment method on file
+- You want the buyer to explicitly approve the charge
+- You are billing a new contact for the first time
+
+### Charge automatically
+
+Crevio charges the buyer's payment method on file without requiring them to take action. The invoice is marked as paid once the charge succeeds.
+
+This method is best when:
+- The buyer is an existing customer with a saved payment method
+- You want to collect payment with minimal friction
+
+## Invoice statuses
+
+Every invoice moves through one of these states:
+
+| Status | Description |
+|--------|-------------|
+| **Open** | The invoice has been created and is awaiting payment. If a due date has been set, the buyer has until that date to pay. |
+| **Paid** | Payment has been received. The associated order and experience grants are created automatically. |
+| **Past due** | The invoice's due date has passed without payment. Crevio marks open invoices as past due automatically. |
+| **Void** | The invoice has been cancelled. A voided invoice cannot be paid or reopened. Use this when an invoice was created in error or is no longer needed. |
+
+<Note>
+  You can void an invoice at any time, regardless of its current status. Voiding an invoice does not affect any orders or experience grants that may have already been created from it.
+</Note>
+
+## Auto-incrementing invoice numbers
+
+Crevio assigns a sequential invoice number to each new invoice within your account, formatted as `#00000001`, `#00000002`, and so on. Numbers are unique per account and auto-increment -- you do not need to manage numbering manually.
+
+This makes it straightforward to reference invoices in your records, correspondence, and accounting.
+
+## Custom descriptions
+
+The description field on an invoice is freeform text (up to 500 characters). Use it to provide context to the buyer, such as:
+
+- A summary of the work or product being billed
+- A reference or PO number
+- Special payment terms or notes
+
+The description appears on the invoice and in the payment email sent to the buyer.
+
+## Due date management
+
+Every invoice requires a due date. This date determines when Crevio considers the invoice overdue:
+
+- **Before the due date** -- The invoice remains in the **Open** status.
+- **After the due date** -- If still unpaid, Crevio automatically transitions the invoice to **Past due**.
+
+<Tip>
+  Set due dates that give your buyers reasonable time to pay. For most situations, 7 to 30 days from the invoice date works well.
+</Tip>
+
+## Invoice PDFs
+
+Crevio generates a downloadable PDF for each invoice. Both you and the buyer can access the PDF via the invoice detail page. PDFs include the invoice number, buyer details, line items, amounts, and status -- useful for bookkeeping and tax records.
+
+## Invoices and checkout
+
+When a buyer pays an invoice via the payment link, Crevio creates a [checkout session](/features/checkout) pre-filled with the buyer's email address from the invoice. This reduces friction and ensures the payment is linked back to the correct invoice record.
+
+Once the checkout completes, the invoice is automatically marked as **Paid** and the buyer receives access to the purchased experiences.

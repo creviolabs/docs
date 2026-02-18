@@ -1,0 +1,89 @@
+---
+title: "Analytics"
+description: "Track revenue, orders, visitor traffic, and customer acquisition with built-in analytics"
+---
+
+Crevio includes a built-in analytics dashboard that gives you a clear view of how your store is performing. From revenue trends to traffic sources, you can monitor the metrics that matter without leaving your dashboard.
+
+## Analytics dashboard
+
+The analytics page is available under **Analytics** in your dashboard. It shows data for a configurable date range (defaulting to the last 30 days) and compares it against the previous period so you can spot trends at a glance.
+
+The dashboard auto-refreshes every 60 seconds, so the numbers stay current as new orders and visits come in.
+
+## Key metrics
+
+The main chart at the top of the page lets you toggle between four primary metrics:
+
+| Metric | What it tracks |
+|--------|---------------|
+| **Leads** | New lead customers acquired per day -- people who provided their email through a free checkout or waitlist. |
+| **Sessions** | Storefront visits per day. A session represents a single visitor's browsing activity. |
+| **Orders** | Orders placed per day across all products. |
+| **Revenue** | Total revenue collected per day, displayed in your account's default currency. |
+
+Each metric shows:
+- The total for the selected period
+- A percentage change compared to the previous period of equal length
+- A day-by-day trend line
+
+<Tip>
+  Use the date range selector to zoom in on a specific promotion, launch, or time window. The previous-period comparison adjusts automatically.
+</Tip>
+
+## Traffic analytics
+
+Below the main chart, you will find detailed breakdowns of your storefront traffic:
+
+### Visits by device
+
+See how your visitors are accessing your store -- desktop, mobile, or tablet. This helps you prioritize design and testing for the devices your audience actually uses.
+
+### Visits by source
+
+Understand where your traffic comes from. Sources include direct visits, search engines, social media platforms, referral links, and any UTM-tagged campaigns you are running.
+
+### Visits by page
+
+See which pages on your storefront get the most views. Use this to identify your best-performing products, landing pages, and content.
+
+### Visits by country
+
+View a geographic breakdown of your visitors. This can help you decide whether to add support for additional currencies, languages, or region-specific promotions.
+
+## Sales by discount code
+
+Track how your [discount codes](/features/discounts) are performing. This chart shows revenue generated through each active discount code, so you can measure the impact of your promotions and decide which codes to keep, extend, or retire.
+
+## Dashboard overview
+
+Your main **Dashboard** page also surfaces key analytics at a glance:
+
+- **Monthly page views** -- Total storefront views in the last 30 days
+- **Monthly revenue** -- Total revenue from successful orders in the last 30 days
+- **Monthly orders** -- Number of orders placed in the last 30 days
+- **Recent orders** -- The five most recent orders with customer details
+
+## PostHog integration
+
+For deeper product analytics, Crevio integrates with [PostHog](https://posthog.com). PostHog provides:
+
+- **Event tracking** -- Detailed tracking of user interactions across your dashboard and storefront
+- **User identification** -- Automatic identification of logged-in users for cohort analysis
+- **Session recordings** -- Watch how buyers interact with your checkout and product pages
+- **Feature flags** -- Roll out new features gradually to subsets of your audience
+
+PostHog runs alongside Crevio's built-in analytics, so you get both a high-level overview in your dashboard and granular event-level data when you need to dig deeper.
+
+## Built-in event tracking with Ahoy
+
+Under the hood, Crevio uses [Ahoy](https://github.com/ankane/ahoy) to track visits and events on your storefront. Ahoy records:
+
+- **Visits** -- Each unique visitor session, including referrer, device type, browser, OS, and geographic location
+- **Events** -- Specific actions taken during a visit, scoped to your account
+
+This data powers the analytics dashboard and is stored within your Crevio account. It is not shared with third parties.
+
+<Note>
+  Analytics data is scoped to your account. If you manage multiple accounts, each has its own independent analytics.
+</Note>

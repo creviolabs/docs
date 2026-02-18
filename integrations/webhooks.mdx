@@ -1,0 +1,175 @@
+---
+title: "Webhooks"
+description: "Receive real-time notifications when events happen in your Crevio account."
+---
+
+Webhooks let you receive automatic HTTP notifications when events happen in your Crevio account -- such as a new order, a checkout being created, or an invoice being paid. Instead of polling the API to check for changes, you set up an endpoint and Crevio pushes events to it in real time.
+
+## What webhooks are and why they are useful
+
+A webhook is an HTTP POST request that Crevio sends to a URL you specify whenever a specific event occurs. Common use cases include:
+
+- **Syncing data** -- Update your CRM, database, or spreadsheet when a new lead is captured or an order is placed.
+- **Triggering automations** -- Send a Slack message, start an email sequence, or enroll a user in a course platform when a purchase completes.
+- **Custom fulfillment** -- Deliver access to external systems, generate license keys, or provision accounts in your own software.
+- **Analytics** -- Track conversion events in your own data warehouse.
+
+## Creating webhook endpoints
+
+<Steps>
+  <Step title="Go to Developer settings">
+    In your dashboard, navigate to **Settings** > **Developer**.
+  </Step>
+  <Step title="Create a new endpoint">
+    Click **New webhook endpoint**. Enter the URL where you want to receive events. This must be an HTTPS URL in production.
+  </Step>
+  <Step title="Select events">
+    Choose which events you want to subscribe to. You can select individual events or subscribe to all available events.
+  </Step>
+  <Step title="Save">
+    Save the endpoint. Crevio generates a unique **signing secret** (prefixed with `whsec_`) that you will use to verify incoming requests.
+  </Step>
+</Steps>
+
+<Warning>
+  Copy your signing secret immediately after creation. You will need it to verify webhook signatures. The secret is shown once and cannot be retrieved later.
+</Warning>
+
+## Available webhook events
+
+Crevio supports the following webhook events:
+
+| Event | Description |
+|-------|-------------|
+| `lead.created` | A new lead has been captured |
+| `checkout.created` | A new checkout session has been created |
+| `order.created` | A new order has been created |
+| `order.paid` | An order has been paid |
+| `invoice.created` | A new invoice has been created |
+| `invoice.paid` | An invoice has been paid |
+| `invoice.past_due` | An invoice is past its due date |
+| `invoice.voided` | An invoice has been voided |
+| `product.created` | A new product has been created |
+| `product.updated` | A product has been updated |
+
+## Webhook payload format
+
+Every webhook delivery is an HTTP POST request with a JSON body. The payload follows this structure:
+
+```json
+{
+  "id": "whev_abc123",
+  "created_at": "2025-01-15T10:30:00Z",
+  "type": "order.paid",
+  "api_version": "v1",
+  "data": {
+    "id": "order_xyz789",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "created_at": "2025-01-15T10:29:55Z"
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique identifier for this webhook event |
+| `created_at` | ISO 8601 timestamp of when the event was created |
+| `type` | The event type (e.g., `order.paid`) |
+| `api_version` | The API version used to generate the payload |
+| `data` | The event-specific payload containing the resource data |
+
+The shape of the `data` object varies by event type. It contains the serialized resource (customer, order, checkout, invoice, or product) relevant to the event.
+
+## Testing webhooks
+
+You can send a test event to any active endpoint to verify your setup:
+
+1. Go to **Settings** > **Developer** and find your webhook endpoint.
+2. Click **Send test** and select the event type you want to test.
+3. Crevio sends a test payload to your URL with `"test": true` in the body. Test events are not persisted -- they are ephemeral.
+
+<Tip>
+  Use a tool like [webhook.site](https://webhook.site) or [ngrok](https://ngrok.com) during development to inspect incoming payloads without setting up a full server.
+</Tip>
+
+## Retry behavior and error handling
+
+Crevio expects your endpoint to respond with a `2xx` status code within **5 seconds**. If the request fails or times out:
+
+- The event is marked as **failed**.
+- Failed events are retained for **7 days** before being automatically deleted.
+- Crevio does **not** automatically retry failed deliveries. If you need to re-trigger a webhook, use the test event feature or trigger the action again in your dashboard.
+
+### Endpoint statuses
+
+| Status | Meaning |
+|--------|---------|
+| **Active** | The endpoint is receiving events normally |
+| **Inactive** | The endpoint is disabled and will not receive any events |
+
+You can deactivate an endpoint at any time without deleting it. Reactivating it resumes delivery for new events.
+
+## Security considerations
+
+### Verifying webhook signatures
+
+Every webhook request includes an `X-Crevio-Hmac-SHA256` header containing a Base64-encoded HMAC-SHA256 signature of the request body. Use this to verify that the request genuinely came from Crevio.
+
+To verify a webhook signature:
+
+1. Read the raw request body as a string.
+2. Compute an HMAC-SHA256 digest using your endpoint's signing secret as the key and the raw body as the message.
+3. Base64-encode the result.
+4. Compare it to the value in the `X-Crevio-Hmac-SHA256` header.
+
+```javascript
+import crypto from "crypto";
+
+function verifyWebhook(rawBody, signature, secret) {
+  const computedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("base64");
+
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(computedSignature)
+  );
+}
+```
+
+```python
+import hmac
+import hashlib
+import base64
+
+def verify_webhook(raw_body: bytes, signature: str, secret: str) -> bool:
+    computed = base64.b64encode(
+        hmac.new(secret.encode(), raw_body, hashlib.sha256).digest()
+    ).decode()
+    return hmac.compare_digest(computed, signature)
+```
+
+<Warning>
+  Always verify the signature before processing a webhook payload. Without verification, an attacker could send forged events to your endpoint.
+</Warning>
+
+### Best practices
+
+- **Respond quickly** -- Return a `200` response as soon as you receive the event, then process it asynchronously. This prevents timeouts.
+- **Handle duplicates** -- Use the event `id` to deduplicate, in case the same event is delivered more than once.
+- **Use HTTPS** -- Webhook endpoints must use HTTPS in production. HTTP URLs are only allowed in local development.
+- **Keep your secret safe** -- Store your signing secret in environment variables or a secrets manager. Never commit it to version control.
+
+## Webhook formats
+
+In addition to the default JSON format, Crevio supports sending webhooks formatted for:
+
+| Format | Use case |
+|--------|----------|
+| **Raw** (default) | Standard JSON payload for your own server |
+| **Slack** | Pre-formatted for Slack incoming webhooks |
+| **Discord** | Pre-formatted for Discord webhook URLs |
+
+Select the format when creating or editing your webhook endpoint.

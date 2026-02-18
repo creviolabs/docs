@@ -1,0 +1,118 @@
+---
+title: "Custom domains"
+description: "Serve your Crevio storefront from your own domain for a fully branded experience."
+---
+
+Every Crevio account gets a free subdomain at `yourname.crevio.site`. If you want your storefront to live on your own domain (e.g., `shop.yourbrand.com`), you can connect a custom domain in a few minutes.
+
+## Why use a custom domain
+
+- **Branding** -- Your storefront URL matches your brand instead of showing `crevio.site`.
+- **SEO** -- Search engines treat your domain as part of your own web presence, building domain authority for your brand rather than Crevio's.
+- **Trust** -- Customers are more likely to purchase from a URL they recognize as yours.
+- **Consistency** -- If you already have a website, your storefront feels like a natural extension of it.
+
+## Default subdomain
+
+When you create your Crevio account, you choose a subdomain. Your storefront is immediately available at:
+
+```
+https://yourname.crevio.site
+```
+
+This subdomain is always active, even after you connect a custom domain. Your subdomain must be:
+
+- Between 2 and 42 characters
+- Lowercase letters, numbers, and hyphens only
+- Unique across all Crevio accounts
+
+<Note>
+  Certain subdomains are reserved (e.g., `admin`, `api`, `app`, `dashboard`, `www`) and cannot be used.
+</Note>
+
+## Setting up a custom domain
+
+<Steps>
+  <Step title="Go to Custom Domain settings">
+    In your dashboard, navigate to **Settings** > **Custom Domain**.
+  </Step>
+  <Step title="Enter your domain">
+    Type the domain you want to use (e.g., `shop.yourbrand.com` or `yourbrand.com`). Click **Save**.
+  </Step>
+  <Step title="Configure DNS">
+    Add a CNAME record at your domain registrar or DNS provider pointing to Crevio's target hostname. See the [DNS configuration](#dns-configuration) section below.
+  </Step>
+  <Step title="Wait for verification">
+    Crevio checks your DNS configuration automatically. Once verified, your domain goes through SSL provisioning and becomes active.
+  </Step>
+</Steps>
+
+## DNS configuration
+
+Add the following CNAME record to your domain's DNS settings:
+
+| Type | Name | Target |
+|------|------|--------|
+| `CNAME` | Your domain (e.g., `shop`) | `customers.crevio.site` |
+
+<Tip>
+  If you are using a subdomain like `shop.yourbrand.com`, the **Name** field is `shop`. If you are using a root domain like `yourbrand.com`, some DNS providers require you to use `@` as the name or use an ALIAS/ANAME record instead of CNAME.
+</Tip>
+
+### Example DNS configurations
+
+**Subdomain (recommended)**
+
+| Type | Name | Target |
+|------|------|--------|
+| `CNAME` | `shop` | `customers.crevio.site` |
+
+Your storefront will be available at `https://shop.yourbrand.com`.
+
+**Root domain**
+
+Root domains (`yourbrand.com` without a subdomain prefix) cannot use standard CNAME records due to DNS specifications. Check if your DNS provider supports one of these alternatives:
+
+- **ALIAS record** (supported by DNSimple, AWS Route 53, and others)
+- **ANAME record** (supported by Cloudflare, DNS Made Easy, and others)
+- **CNAME flattening** (supported by Cloudflare)
+
+If your provider does not support any of these, use a subdomain instead.
+
+## Domain verification process
+
+After you add the DNS record, Crevio verifies your domain in stages:
+
+| Status | What it means |
+|--------|--------------|
+| **Pending** | Crevio is waiting for your DNS record to propagate. This typically takes a few minutes but can take up to 48 hours depending on your DNS provider. |
+| **SSL pending** | DNS has been verified. Crevio is provisioning an SSL certificate for your domain. |
+| **Active** | Your domain is verified, SSL is active, and your storefront is live on the custom domain. |
+| **Error** | Something went wrong. Check that your DNS record is correct and try again. |
+
+<Note>
+  DNS propagation times vary by provider. If your domain stays in **Pending** for more than a few hours, double-check your CNAME record and ensure there are no conflicting records (like an existing A record on the same name).
+</Note>
+
+## SSL / HTTPS
+
+SSL certificates are provisioned **automatically** for your custom domain. You do not need to purchase, upload, or manage certificates yourself.
+
+- Crevio uses Cloudflare for SSL provisioning.
+- Certificates are issued and renewed automatically.
+- All traffic is served over HTTPS. HTTP requests are redirected to HTTPS.
+- Your customers always see the padlock icon in their browser.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="My domain is stuck in 'Pending'">
+    Verify that the CNAME record is correctly set up at your DNS provider. Use a tool like [dnschecker.org](https://dnschecker.org) to confirm that the record has propagated. Remove any conflicting A records on the same hostname.
+  </Accordion>
+  <Accordion title="SSL certificate is not being issued">
+    SSL provisioning happens after DNS verification. If your domain is in **SSL pending** for more than an hour, try removing and re-adding the domain in your Crevio settings. Ensure your DNS provider is not proxying the CNAME record (if using Cloudflare for DNS, set the proxy status to **DNS only** / grey cloud).
+  </Accordion>
+  <Accordion title="I want to change my custom domain">
+    Go to **Settings** > **Custom Domain**, remove the current domain, and add the new one. Update your DNS records accordingly. The old domain will stop serving your storefront once removed.
+  </Accordion>
+</AccordionGroup>

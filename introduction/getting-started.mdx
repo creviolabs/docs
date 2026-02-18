@@ -1,0 +1,138 @@
+---
+title: "Getting started"
+description: "Create your account, set up your storefront, and start selling in minutes."
+---
+
+This guide walks you through going from zero to a published product with a shareable checkout link. The whole process takes about five minutes.
+
+## Prerequisites
+
+Before you begin, you will need:
+
+- An email address to create your Crevio account
+- A [Stripe account](https://stripe.com) if you plan to accept paid transactions (you can start with free products and connect Stripe later)
+
+## Set up your account
+
+<Steps>
+  <Step title="Sign up">
+    Go to [app.crevio.co](https://app.crevio.co) and create your account. You can sign up with your email or use Google, Discord, or Telegram OAuth.
+  </Step>
+  <Step title="Name your store">
+    Choose a name for your account. This is the brand name your customers will see. You will also get a free subdomain at `yourname.crevio.site` that serves as your public storefront.
+  </Step>
+  <Step title="Complete onboarding">
+    Follow the onboarding steps to set your avatar, add a bio, and configure your store basics. You can always update these later from **Settings**.
+  </Step>
+</Steps>
+
+## Customize your storefront
+
+Your storefront is a link-in-bio style page where customers can browse your products. You can customize it from the **Storefront** section of your dashboard.
+
+- **Avatar and bio** -- Add a profile image and short description.
+- **Social links** -- Connect your social media profiles so customers can find you elsewhere.
+- **Store blocks** -- Arrange products, text, images, videos, FAQs, and links on your page.
+- **Theme** -- Customize colors and styling to match your brand.
+
+<Tip>
+  Your storefront is live at `yourname.crevio.site` as soon as you create your account. You can also [connect a custom domain](/integrations/custom-domain) later.
+</Tip>
+
+## Create your first product
+
+Products are the core of your store. Each product has a name, description, media, and one or more price variants.
+
+<Steps>
+  <Step title="Go to Products">
+    In your dashboard, navigate to **Products** and click **New product**.
+  </Step>
+  <Step title="Add product details">
+    Give your product a name and description. You can also upload cover images, add a gallery, and write rich-text content using the built-in editor.
+  </Step>
+  <Step title="Add a price variant">
+    Every product needs at least one price variant. A price variant defines how much the product costs and how it is billed. Choose from:
+
+    - **Free** -- No charge. Great for lead magnets or free samples.
+    - **One-time payment** -- A single fixed charge (e.g., $29).
+    - **Subscription** -- Recurring billing on a daily, weekly, monthly, quarterly, semi-annual, or annual cycle.
+    - **Pay what you want** -- Let customers choose their own price within a range you define.
+
+    You can add multiple price variants to a single product to offer different tiers (e.g., a monthly and annual option).
+  </Step>
+  <Step title="Attach experiences">
+    Experiences are what your customers get access to after purchasing. Attach one or more experiences to each price variant:
+
+    - Courses, digital downloads, written content, website embeds, links, forums, Discord servers, Telegram groups, or events.
+
+    See [How Crevio works](/introduction/how-crevio-works) for a full breakdown of experience types.
+  </Step>
+  <Step title="Publish">
+    When you are ready, set the product status to **Active**. It will be published to your storefront and available for purchase.
+  </Step>
+</Steps>
+
+## Connect Stripe
+
+To accept paid transactions, you need to connect a Stripe account.
+
+<Steps>
+  <Step title="Go to Settings">
+    Navigate to **Settings** > **Payments** in your dashboard.
+  </Step>
+  <Step title="Connect Stripe">
+    Click **Connect with Stripe** and follow the Stripe onboarding flow. If you already have a Stripe account, you can connect it directly. Otherwise, Stripe will guide you through creating one.
+  </Step>
+  <Step title="Start selling">
+    Once connected, Crevio automatically creates Stripe products and prices for your price variants. Payments flow directly to your Stripe account.
+  </Step>
+</Steps>
+
+<Note>
+  Free products work without Stripe. You only need to connect Stripe when you want to charge customers.
+</Note>
+
+## Share your checkout link
+
+Every product and price variant has a shareable link you can distribute anywhere:
+
+- **Product page** -- Share the link to your product page on your storefront (e.g., `yourname.crevio.site/products/my-course`).
+- **Direct checkout link** -- Share a link that takes customers straight to checkout, skipping the product page.
+- **QR code** -- Each product automatically generates a QR code you can use in print materials or presentations.
+
+<Tip>
+  Add your storefront link to your social media bios, email signatures, and content to drive traffic to your products.
+</Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card
+    title="How Crevio works"
+    icon="circle-info"
+    href="/introduction/how-crevio-works"
+  >
+    Understand the core concepts behind accounts, products, experiences, and orders.
+  </Card>
+  <Card
+    title="Products"
+    icon="box"
+    href="/features/products"
+  >
+    Learn about advanced product features like SEO, scheduling, and media galleries.
+  </Card>
+  <Card
+    title="Pricing"
+    icon="tags"
+    href="/features/pricing"
+  >
+    Explore pricing options including trials, discounts, limited inventory, and seat-based bundles.
+  </Card>
+  <Card
+    title="Discounts"
+    icon="percent"
+    href="/features/discounts"
+  >
+    Create discount codes and promotions to boost sales.
+  </Card>
+</CardGroup>

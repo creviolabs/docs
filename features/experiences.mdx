@@ -1,0 +1,189 @@
+---
+title: "Experiences"
+description: "Deliver content and access to your buyers -- courses, downloads, communities, events, and more"
+---
+
+Experiences are what your buyers receive after purchasing a product. They represent the actual value you deliver -- a course to complete, files to download, a Discord server to join, or any combination of content types bundled together.
+
+Every experience is attached to one or more [price variants](/features/pricing), not directly to a product. This lets you offer different levels of access at different price points from a single product page.
+
+## Access types
+
+Each experience has an access type that controls who can view its content.
+
+| Access type | Who can access |
+|-------------|---------------|
+| **Secret** | Only customers who have purchased a price variant that includes this experience. Each customer's access is tracked individually through experience grants. This is the default. |
+| **Open** | Any team member on your account can access the experience without purchasing. Useful for internal content, team resources, or content you want your collaborators to see. |
+
+<Note>
+  Admins can always access all experiences regardless of access type.
+</Note>
+
+## Experience types
+
+Crevio supports nine experience types. You can attach multiple types to a single price variant to create rich, bundled offerings.
+
+### Courses
+
+Structured learning content organized into chapters and lessons.
+
+- **Chapters and lessons** -- Build a curriculum with ordered chapters, each containing one or more lessons
+- **Progress tracking** -- Crevio tracks which lessons a customer has viewed and completed
+- **Completion tracking** -- Mark a course as complete when a customer finishes all lessons
+- **Instructors** -- Assign an instructor to each course
+- **Cover image** -- Upload a dedicated cover image for the course landing page
+
+<Tip>
+  Courses work well as the anchor experience in a product bundle. Pair a course with a Discord server or forum to give students a place to ask questions and discuss lessons.
+</Tip>
+
+### Digital downloads
+
+Distribute files directly to your buyers.
+
+- Upload multiple files per experience (up to **2 GB** total)
+- Supports any file format -- PDFs, ZIPs, images, audio, video, and more
+- Buyers access their downloads from their purchase dashboard
+
+### Written content
+
+Rich HTML articles delivered as part of a purchase.
+
+- Create long-form written content using the rich text editor
+- Supports up to 50,000 characters per article
+- Optional cover image and title
+- Ideal for exclusive guides, reports, playbooks, or supplementary material
+
+### Discord server
+
+Automatically manage Discord access based on purchases.
+
+<Steps>
+<Step title="Connect your Discord server">
+  Link your Discord server to Crevio through the Discord integration. Crevio's bot joins your server and can manage roles.
+</Step>
+
+<Step title="Configure role assignment">
+  Choose which Discord roles to assign when a customer purchases. Buyers are automatically invited and given the selected roles.
+</Step>
+
+<Step title="Set cancellation behavior">
+  Decide what happens when a customer's access is revoked (e.g., subscription cancellation or refund).
+</Step>
+</Steps>
+
+Cancellation actions:
+
+| Action | What happens |
+|--------|-------------|
+| **No action** | The customer keeps their roles and server access. |
+| **Remove role** | The assigned purchase role is removed, but the customer stays in the server. |
+| **Kick user** | The customer is removed from the server entirely. |
+| **Remove all roles** | All roles are stripped from the customer, but they remain in the server. |
+
+<Note>
+  You need to set up the [Discord integration](/integrations/discord) before creating a Discord server experience.
+</Note>
+
+### Telegram group
+
+Automatically manage Telegram group or channel access.
+
+- Customers are auto-invited to your Telegram group when they purchase
+- Access is revoked automatically when a subscription is cancelled or access expires
+- Supports multiple connected chats per experience
+
+<Note>
+  You need to set up the [Telegram integration](/integrations/telegram) before creating a Telegram experience.
+</Note>
+
+### Events
+
+Host live or scheduled sessions for your customers.
+
+- Create multiple **event sessions** with specific dates and times
+- Track attendees per session
+- Use events for webinars, workshops, office hours, live Q&As, or any time-based experience
+
+### Forums
+
+Community discussion spaces for your customers.
+
+- Customers can create posts, comment, and like content
+- Organize discussions with **topics** (up to 5 per post)
+- Pin important posts to the top
+- Upload file attachments (up to 50 MB per post)
+- Optional cover image and description
+
+Three layout options to match your community style:
+
+| Layout | Description |
+|--------|-------------|
+| **Feed** | Social media-style vertical feed. Best for active, fast-moving discussions. |
+| **List** | Compact list view. Best for structured, topic-driven forums. |
+| **Card** | Card grid layout. Best for visual or curated discussions. |
+
+### Links
+
+Curated collections of external URLs.
+
+- Add multiple link items to a single experience
+- Each link item has its own URL
+- Useful for resource lists, tool recommendations, reading lists, or curated content hubs
+
+### Website embeds
+
+Embed an external website or web app directly within the customer's experience dashboard.
+
+- Enter any URL to embed it in an iframe
+- Crevio validates the URL's `X-Frame-Options` header to ensure the site allows embedding
+- URLs that return `DENY` or `SAMEORIGIN` headers cannot be embedded
+
+<Warning>
+  Not all websites allow embedding. If a site blocks iframe embedding through its headers, you will see a validation error. Consider using a **Link** experience as an alternative for sites that cannot be embedded.
+</Warning>
+
+## Experience grants
+
+When a customer completes a purchase, Crevio creates **experience grants** -- individual records that link a customer to each experience included in their purchased price variant.
+
+Grants can be created in three ways:
+
+| Grant type | How it works |
+|------------|-------------|
+| **Order** | Automatically created when a customer completes a purchase. This is the most common type. |
+| **Lead magnet** | Automatically created when a customer submits a lead magnet form on your [storefront](/features/storefront). |
+| **Manual** | Created by you or a team member directly from the dashboard. Useful for gifting access or resolving support requests. |
+
+Each grant tracks:
+- When access was granted
+- When access was revoked (if applicable)
+- An optional expiration date
+- The source of the grant (order, lead magnet, or manual with a reason)
+
+<Tip>
+  A customer can only have one active grant per experience. If they purchase the same experience through a different price variant, the existing grant remains active rather than creating a duplicate.
+</Tip>
+
+## Auto-revoke after X days
+
+If you configure **revoke after days** on a [price variant](/features/pricing#auto-revoke-access), the experience grants created from that variant will automatically expire after the specified number of days. Crevio sets the expiration date at the time of purchase and revokes access once the period elapses.
+
+This is useful for:
+- Time-limited access to courses or downloads
+- Trial periods on one-time purchases
+- Rental-style digital content
+
+<Note>
+  Auto-revoke is set at the price variant level, not the experience level. Different price variants on the same product can have different revoke periods, letting you offer both time-limited and permanent access tiers.
+</Note>
+
+## Revoking access
+
+Access is revoked automatically when:
+- A **subscription** is cancelled or lapses
+- An **auto-revoke** period expires
+- A **refund** is processed on the associated order
+
+You can also revoke access manually from the customer's detail page in your dashboard.

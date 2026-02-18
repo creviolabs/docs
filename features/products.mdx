@@ -1,0 +1,107 @@
+---
+title: "Products"
+description: "Create, manage, and publish digital products on your Crevio storefront"
+---
+
+Products are the core of your Crevio store. A product represents anything you sell -- a course, a digital download, a membership, an event, or a combination of several experiences bundled together.
+
+## Creating a product
+
+<Steps>
+<Step title="Name your product">
+  Go to **Products** in your dashboard and click **New product**. Give it a name (up to 100 characters). Crevio auto-generates a URL slug from the name, which you can customize later.
+</Step>
+
+<Step title="Add media">
+  Upload images, videos, or other media to your product's gallery. Media appears on your storefront's product page and helps buyers understand what they are getting.
+</Step>
+
+<Step title="Add at least one price variant">
+  Every product needs at least one [price variant](/features/pricing) before it can go live. Price variants define how much the product costs and how buyers are billed.
+</Step>
+
+<Step title="Attach experiences">
+  Experiences are what buyers receive after purchase. Attach one or more experiences to each price variant -- for example, a course, a digital download, a Discord server invite, or a link to external content.
+
+  <Tip>
+    Different price variants on the same product can grant access to different experiences, letting you create tiered offerings from a single product page.
+  </Tip>
+</Step>
+
+<Step title="Set the product to active">
+  When you are ready, change the product status to **Active**. Crevio automatically publishes it on your storefront.
+</Step>
+</Steps>
+
+## Product statuses
+
+Every product has one of three statuses:
+
+| Status | Meaning |
+|--------|---------|
+| **Draft** | The default status for new products. Draft products are not visible on your storefront and cannot be purchased. Use this while you are still setting things up. |
+| **Active** | The product is live. It appears on your storefront and can be purchased by buyers. A product must have at least one price variant before you can activate it. |
+| **Archived** | The product is hidden from your storefront and can no longer be purchased. Existing orders and access grants are unaffected. Use this to retire a product without deleting it. |
+
+<Note>
+  You can move a product between statuses at any time. Activating a product automatically publishes it; archiving or returning to draft automatically unpublishes it.
+</Note>
+
+## Product media
+
+Product media is managed through Crevio's media library. You can attach multiple images to a product's gallery, and they display in the order you set.
+
+Supported media:
+- **Images** -- JPEG, PNG, WebP, and other common formats
+- **Open Graph image** -- A dedicated image used for social sharing previews (link cards on X, Facebook, Slack, etc.)
+
+<Tip>
+  Upload a high-quality Open Graph image to make your product links stand out when shared on social media.
+</Tip>
+
+## SEO settings
+
+Each product has optional SEO fields that control how it appears in search engines and social previews:
+
+- **SEO title** -- Up to 60 characters. Shown as the page title in search results.
+- **SEO description** -- Up to 160 characters. Shown as the snippet beneath the title in search results.
+
+If you leave these blank, Crevio uses the product name and any available description as defaults.
+
+## Product URL and slugs
+
+Every product gets a public URL based on your storefront subdomain and the product's slug:
+
+```
+https://yourstore.crevio.site/products/your-product-slug
+```
+
+Crevio auto-generates the slug from your product name using kebab-case (lowercase letters, numbers, and hyphens). You can edit the slug at any time. Slugs are unique within your account -- if a duplicate is detected, Crevio appends a number automatically (e.g., `my-product-1`).
+
+<Warning>
+  Changing a product's slug updates its URL immediately. Any previously shared links using the old slug will stop working.
+</Warning>
+
+## Attaching experiences to products
+
+Experiences are attached at the **price variant** level, not directly on the product. This gives you fine-grained control over what each pricing tier includes.
+
+Available experience types:
+
+| Type | What the buyer gets |
+|------|-------------------|
+| **Digital download** | Downloadable files (PDFs, ZIPs, etc.) |
+| **Course** | Structured course with chapters and lessons |
+| **Written content** | Rich-text content pages |
+| **Website embed** | An embedded external website or app |
+| **Link** | A redirect to an external URL |
+| **Discord server** | Auto-invite to a Discord server |
+| **Telegram** | Access to a Telegram group or channel |
+| **Event** | Access to a live or scheduled event |
+| **Forum** | Access to a community discussion forum |
+
+A single price variant can include multiple experiences (e.g., a course *and* a Discord invite), letting you create bundles without additional configuration.
+
+<Tip>
+  A product also generates a QR code automatically when created. You can download the QR code and use it on printed materials, slides, or anywhere else to link directly to the product page.
+</Tip>

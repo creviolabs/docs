@@ -1,0 +1,65 @@
+---
+title: "Customers"
+description: "Track your buyers, segment your audience, and understand customer lifetime value"
+---
+
+Customers represent the people who interact with your store -- whether they browse, sign up, or make a purchase. Crevio automatically creates and manages customer records so you always have a clear picture of your audience.
+
+## Customer types
+
+Every customer is classified into one of three types. Crevio assigns and updates the type automatically based on the customer's activity.
+
+| Type | Who they are |
+|------|-------------|
+| **Lead** | A guest visitor who provided their email (e.g., through a free checkout or waitlist) but has not created an account. Leads have no registered user account. |
+| **Free** | A registered user who has signed up but has not made any paid purchases. |
+| **Paid** | A registered user who has completed at least one paid order. |
+
+<Note>
+  Customer types update automatically. When a lead creates an account, they become a **free** customer. When a free customer makes their first paid purchase, they become a **paid** customer.
+</Note>
+
+## How customers are created
+
+Customers are added to your account through several channels:
+
+- **Checkout** -- When someone completes a purchase (paid or free), Crevio creates a customer record using the buyer's name and email address.
+- **Waitlist sign-ups** -- When a buyer joins a waitlist for a sold-out product, a lead customer is created.
+- **API** -- You can create customers programmatically through the [Crevio API](/api-reference/introduction).
+
+Each customer is uniquely identified by their email address within your account. If someone checks out with an email that already exists in your customer list, Crevio links the order to the existing record rather than creating a duplicate.
+
+## Searching and filtering customers
+
+The **Customers** page in your dashboard lists all customers in your account. You can search by name or email to quickly find a specific person.
+
+Each customer in the list shows:
+- Name and email address
+- Customer type (lead, free, or paid)
+- Number of orders
+- Total spend
+- Tags
+- Date added
+
+## Customer details
+
+Click on any customer to view their full profile. The detail page shows:
+
+- **Order history** -- Every order the customer has placed, including line items and status
+- **Total spend** -- The sum of all successful order amounts
+- **Average order value** -- Total spend divided by total order count
+- **Contact information** -- Name, email, and phone number (if provided)
+
+## Customer tags
+
+Tags let you organize and segment your customers. You can assign one or more tags to any customer to group them by interest, purchase behavior, campaign source, or any other criteria you choose.
+
+Tags are unique within your account -- creating a tag with the same name as an existing one reuses the existing tag rather than creating a duplicate.
+
+<Tip>
+  Use tags to build segments for targeted outreach. For example, tag customers who purchased a specific product so you can notify them about related launches.
+</Tip>
+
+## Exporting customers
+
+You can export your entire customer list as a CSV file from the **Customers** page. The export includes all customer fields -- name, email, customer type, order count, total spend, and tags. This is useful for importing into email marketing tools, CRMs, or spreadsheets for further analysis.

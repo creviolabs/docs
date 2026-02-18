@@ -1,0 +1,89 @@
+---
+title: "Orders"
+description: "View, manage, and refund orders placed through your Crevio storefront"
+---
+
+An order is created every time a buyer completes [checkout](/features/checkout). Orders track what was purchased, how much was paid, and whether the buyer has been granted access to their purchased experiences.
+
+## Order statuses
+
+Every order has a status that reflects the current state of payment.
+
+| Status | Meaning |
+|--------|---------|
+| **Succeeded** | Payment was captured successfully. The buyer has been granted access to their purchased experiences. |
+| **Pending** | The order has been created but payment has not yet been confirmed. |
+| **Failed** | The payment attempt failed (e.g., insufficient funds, declined card). |
+| **Refunded** | The full order amount has been refunded to the buyer. |
+| **Partially refunded** | A portion of the order amount has been refunded while the remainder stands. |
+| **Disputed** | The buyer has opened a payment dispute (chargeback) with their bank or card issuer. |
+
+<Note>
+  Free orders (where every item has a free price variant) skip payment processing entirely and are marked as **Succeeded** immediately.
+</Note>
+
+## Order line items
+
+Each order contains one or more line items. A line item represents a specific [price variant](/features/pricing) that the buyer selected during checkout, along with the quantity purchased.
+
+Line items link back to both the product and the price variant, so you can see exactly what tier the buyer chose and what experiences they are entitled to.
+
+## Access tokens
+
+When an order succeeds, Crevio generates an **access token** -- a unique, secure link that the buyer uses to claim their purchased experiences. Access tokens serve several purposes:
+
+- **Content delivery** -- Buyers follow the access link to view or download their purchased content.
+- **Seat-based orders** -- For products with seat-based pricing, each seat gets its own access token. The buyer claims one token, and additional tokens can be shared with team members via email invites.
+- **View tracking** -- Access tokens track how many times content has been viewed and from which IP addresses, enabling optional authentication gating after a set number of free views.
+
+<Tip>
+  Access tokens are included in the order confirmation sent to the buyer. You can also find them in the order detail view in your dashboard.
+</Tip>
+
+## Refunds
+
+You can issue refunds for any succeeded order directly from your dashboard or through Stripe.
+
+### Full refunds
+
+A full refund returns the entire order amount to the buyer. The order status changes to **Refunded** and any inventory limits on the purchased price variants are automatically restored.
+
+### Partial refunds
+
+A partial refund returns a portion of the order amount. The order status changes to **Partially refunded**. This is useful when a buyer is unsatisfied with part of a bundle or when you want to offer a goodwill credit without reversing the entire purchase.
+
+<Note>
+  When an order is fully refunded or fails, Crevio automatically restores inventory for all line items. This means the refunded units become available for purchase again without manual intervention.
+</Note>
+
+## Viewing and filtering orders
+
+The **Orders** page in your dashboard shows all orders across your account, sorted by most recent. Each row displays:
+
+- Order ID
+- Status
+- Customer name and email
+- Amount and currency
+- Date placed
+- Whether a discount was applied
+
+You can expand any order to see its full details, including:
+- **Line items** -- The products and price variants purchased
+- **Customer** -- The buyer's profile and contact information
+- **Discount** -- The discount code applied, if any
+- **Access tokens** -- The tokens generated for content delivery
+- **Charge** -- The Stripe charge details including fees
+
+## Order details page
+
+Click on an order to open its detail page. Here you see the complete picture:
+
+- Full line item breakdown with product names, price variant names, and quantities
+- Customer profile with a link to their [customer detail page](/features/customers)
+- Payment details including the amount, currency, and Stripe charge reference
+- Subscription information (if the order is tied to a recurring subscription)
+- Access token status showing whether tokens have been claimed
+
+## Free orders
+
+Orders where all items have free price variants are handled without any payment processing. These orders are marked as **Succeeded** immediately upon checkout completion, and the buyer receives access to the associated experiences just like a paid order. Free orders do not have a Stripe charge attached.

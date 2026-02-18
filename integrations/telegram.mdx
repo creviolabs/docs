@@ -1,0 +1,104 @@
+---
+title: "Telegram"
+description: "Connect your Telegram groups and channels to sell paid access with automatic member management."
+---
+
+The Telegram integration lets you sell access to Telegram groups and channels as a product experience. When a customer purchases, Crevio generates a unique invite link and sends it directly to the customer via Telegram DM. When access is revoked, Crevio can remove or ban the user automatically.
+
+## Setting up the Telegram integration
+
+Before you begin, make sure you have:
+
+- A Telegram group or channel where you are an admin
+- The Crevio bot added to your group or channel as an admin
+- A Crevio product with at least one price variant
+
+## Connecting your Telegram group or channel
+
+<Steps>
+  <Step title="Create a Telegram experience">
+    In your dashboard, go to **Products**, select a product, and add or edit a price variant. Under **Experiences**, create a new experience and choose **Telegram** as the type.
+  </Step>
+  <Step title="Start verification">
+    Click **Connect Telegram channel**. Crevio generates a unique verification code.
+  </Step>
+  <Step title="Add the bot to your group">
+    Add the Crevio Telegram bot to your group or channel as an **admin**. Then send the verification code as a message in the chat. The bot needs admin privileges to manage members and create invite links.
+  </Step>
+  <Step title="Wait for verification">
+    Crevio automatically detects the verification message and links the chat to your experience. The verification completes within a few seconds.
+  </Step>
+</Steps>
+
+<Note>
+  The verification code expires after 5 minutes. If it expires, click **Connect Telegram channel** again to generate a new one.
+</Note>
+
+## Creating a Telegram experience
+
+Once connected, your Telegram experience is ready. You can connect multiple chats (groups and channels) to a single experience -- when a customer purchases, they receive invite links for all connected chats.
+
+Configure these settings for each Telegram experience:
+
+- **Connected chats** -- The Telegram groups and channels linked to this experience.
+- **Cancellation action** -- What happens when a subscription is cancelled or an order is refunded.
+
+## How auto invite and remove works
+
+### Granting access
+
+When a customer completes a checkout that includes a Telegram experience:
+
+1. Crevio checks if the customer has connected their Telegram account via OAuth.
+2. For each connected chat, Crevio creates a **single-use invite link** personalized for the customer.
+3. The invite links are sent to the customer via a Telegram DM from the Crevio bot.
+4. The customer clicks the link to join the group or channel.
+
+### Revoking access
+
+When a subscription is cancelled, an order is refunded, or access is revoked manually, Crevio takes action based on the configured cancellation setting:
+
+| Action | What happens |
+|--------|-------------|
+| **No action** | The customer stays in the group or channel. Handle removal manually if needed. |
+| **Remove user** | The customer is removed from the chat but can rejoin if they obtain a new invite link. |
+| **Ban user** | The customer is kicked and banned from the chat, preventing them from rejoining. |
+
+## Customer OAuth connection
+
+For the Telegram integration to work, your customers need to connect their Telegram account to Crevio. This happens through Telegram's OAuth flow:
+
+1. After purchasing a product with a Telegram experience, the customer is prompted to **Connect Telegram**.
+2. They authorize Crevio to identify their Telegram account.
+3. Once authorized, Crevio sends invite links via DM and manages their access going forward.
+
+This is a one-time connection -- once linked, all future Telegram-based purchases use the same connection.
+
+## Managing members
+
+You can manage Telegram access for individual customers from your dashboard:
+
+- **Add member** -- Manually generate and send invite links to a specific customer.
+- **Remove member** -- Remove a customer from all connected chats.
+- **Remove a connected chat** -- Disconnect a specific group or channel from the experience. This does not remove existing members from the chat.
+
+<Tip>
+  If you need to move to a different Telegram group, remove the old chat and connect the new one. Existing members are not automatically migrated -- they will need new invite links.
+</Tip>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The verification code is not being detected">
+    Make sure the Crevio bot is in the group or channel **as an admin** before you send the verification code. The bot needs admin privileges to read messages. Also verify that you are sending the exact code (including the `VERIFY_` prefix) as a message in the chat, not as a reply or edit.
+  </Accordion>
+  <Accordion title="Customers are not receiving invite links">
+    The customer must have their Telegram account connected to Crevio. If they have not connected it, they will see a prompt on their experience page. Also confirm that the customer has not blocked the Crevio bot on Telegram -- blocked bots cannot send DMs.
+  </Accordion>
+  <Accordion title="The bot cannot create invite links">
+    Ensure the Crevio bot has the **Create Invite Links** admin permission in your Telegram group or channel. Without this permission, the bot cannot generate access links for customers.
+  </Accordion>
+  <Accordion title="I removed a connected chat by mistake">
+    Reconnect it by clicking **Connect Telegram channel** and sending a new verification code in the chat. Existing members are not affected.
+  </Accordion>
+</AccordionGroup>

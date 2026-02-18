@@ -1,0 +1,99 @@
+---
+title: "Discord"
+description: "Connect your Discord server to automatically grant and revoke access for paying customers."
+---
+
+The Discord integration lets you sell access to your Discord server as a product experience. When a customer purchases a product that includes a Discord experience, Crevio automatically adds them to your server and assigns the roles you configure. When a subscription is cancelled or an order is refunded, Crevio handles the removal or role changes based on your settings.
+
+## Setting up the Discord integration
+
+Before you begin, make sure you have:
+
+- A Discord server where you have **Manage Server** permissions
+- A Crevio product with at least one price variant
+
+## Connecting your Discord server
+
+<Steps>
+  <Step title="Create a Discord experience">
+    In your dashboard, go to **Products**, select a product, and add or edit a price variant. Under **Experiences**, create a new experience and choose **Discord server** as the type.
+  </Step>
+  <Step title="Connect your server">
+    Click **Connect Discord server**. You will be redirected to Discord's authorization page.
+  </Step>
+  <Step title="Select your server">
+    From the dropdown, choose the Discord server you want to connect. Review the permissions Crevio requests (manage roles, kick members, view channels, send messages, and more), then click **Authorize**.
+  </Step>
+  <Step title="Configure roles">
+    Once connected, you will see your server listed. Select the **assignable roles** that should be given to customers when they purchase this product.
+  </Step>
+</Steps>
+
+<Note>
+  Crevio's bot role must be positioned **above** any roles you want it to assign in your Discord server's role hierarchy. If the bot role is below a target role, Discord will prevent the assignment.
+</Note>
+
+## Creating a Discord experience
+
+After connecting your server, configure the experience settings:
+
+- **Assignable roles** -- The roles to give buyers on purchase. You can select multiple roles.
+- **Event log channel** -- Optionally select a text channel where Crevio posts access events (member added, member removed, roles changed).
+- **Cancellation action** -- What happens when a subscription is cancelled or an order is refunded (see below).
+- **Past due role** -- A role to assign when a subscriber's payment is past due, giving you the option to restrict access without fully removing them.
+
+## How auto role assignment works on purchase
+
+When a customer completes a checkout that includes a Discord experience:
+
+1. Crevio checks if the customer has connected their Discord account via OAuth.
+2. If connected, the customer is automatically added to your Discord server using Discord's API.
+3. All **assignable roles** configured on the experience are applied to the customer.
+4. An event is logged to your configured event log channel (if set).
+
+If the customer has not connected their Discord account yet, they are prompted to do so from their experience access page. Once they connect, access is granted automatically.
+
+## Cancellation actions
+
+You choose what Crevio does when a subscription is cancelled or an order is refunded. This is configured per Discord experience.
+
+| Action | What happens |
+|--------|-------------|
+| **No action** | The customer keeps their server membership and roles. Useful if you want to handle removal manually. |
+| **Remove role** | Only the assignable roles configured on this experience are removed. The customer stays in the server with any other roles intact. |
+| **Kick user** | The customer is removed from the server entirely. They can rejoin if they have another invite. |
+| **Remove all roles** | All roles (except `@everyone`) are stripped from the customer. They remain in the server but lose all role-based access. |
+
+<Tip>
+  The **Remove role** option is best when you sell access to multiple tiers within the same server. It removes only the specific roles tied to the cancelled purchase without affecting access granted by other purchases.
+</Tip>
+
+## Customer OAuth connection for automatic access
+
+For the Discord integration to work, your customers need to connect their Discord account to Crevio. This happens through Discord OAuth:
+
+1. After purchasing a product with a Discord experience, the customer sees a prompt to **Connect Discord**.
+2. They authorize Crevio to identify their Discord account and add them to servers on their behalf.
+3. Once authorized, Crevio adds them to your server and assigns the configured roles.
+
+This is a one-time connection. Once a customer has linked their Discord account, all future Discord-based purchases use the same connection automatically.
+
+## Troubleshooting common issues
+
+<AccordionGroup>
+  <Accordion title="The bot cannot assign roles">
+    Check your Discord server's role hierarchy. Crevio's bot role must be positioned **above** the roles you want it to assign. Go to your Discord server's **Settings** > **Roles** and drag the bot role higher in the list.
+  </Accordion>
+  <Accordion title="A customer was not added to the server">
+    Verify that the customer has connected their Discord account via OAuth. If they have not, they will see a connection prompt on their experience page. Also ensure that the Discord experience has a connected server -- check the experience settings in your dashboard.
+  </Accordion>
+  <Accordion title="Cancellation action did not work">
+    The cancellation action only fires when Crevio processes a subscription cancellation or refund webhook from Stripe. If you cancelled the subscription directly in Stripe's dashboard, there may be a short delay. Check that the customer has a connected Discord account -- without it, Crevio cannot identify which Discord user to act on.
+  </Accordion>
+  <Accordion title="I want to connect a different Discord server">
+    Disconnect the current server from the experience settings, then click **Connect Discord server** again and select the new server. Existing members from the old server are not automatically removed or migrated.
+  </Accordion>
+  <Accordion title="Event log messages are not posting">
+    Make sure the event log channel is a **text channel** and that the Crevio bot has permission to send messages in that channel. If the channel was deleted or the bot's permissions were changed, update the event log channel setting in Crevio.
+  </Accordion>
+</AccordionGroup>

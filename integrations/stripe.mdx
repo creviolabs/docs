@@ -1,0 +1,114 @@
+---
+title: "Stripe"
+description: "Connect your Stripe account to accept payments, manage subscriptions, and handle payouts through Crevio."
+---
+
+Crevio uses [Stripe](https://stripe.com) as its payment processor. All paid transactions -- one-time purchases, subscriptions, and invoices -- flow through your Stripe account. You keep full ownership of your Stripe account and customer relationships.
+
+## Connecting your Stripe account
+
+<Steps>
+  <Step title="Go to Settings">
+    In your dashboard, navigate to **Settings** > **Payments**.
+  </Step>
+  <Step title="Start Stripe onboarding">
+    Click **Connect with Stripe**. You will be redirected to Stripe's onboarding flow.
+  </Step>
+  <Step title="Complete onboarding">
+    If you already have a Stripe account, sign in and select it. Otherwise, Stripe walks you through creating a new account. You will need to provide your business details, bank account information, and identity verification.
+  </Step>
+  <Step title="Return to Crevio">
+    Once onboarding is complete, you are redirected back to Crevio. Your Stripe account is now connected and you can start accepting payments.
+  </Step>
+</Steps>
+
+<Note>
+  You only need Stripe for paid products. Free products work without a Stripe connection.
+</Note>
+
+## How payments work
+
+Crevio uses Stripe's **custom UI checkout mode** to keep the entire payment experience on your storefront. Buyers never leave your page to complete a purchase.
+
+When a buyer checks out:
+
+1. Crevio creates a Stripe Checkout Session in custom UI mode.
+2. Stripe's embedded payment form collects card details, billing info, and tax directly within your storefront.
+3. On successful payment, Stripe sends a webhook to Crevio.
+4. Crevio creates the order, grants experience access, and sends the buyer a confirmation.
+
+Crevio automatically determines the checkout mode based on the items in the cart:
+
+| Cart contents | Checkout mode |
+|---------------|---------------|
+| One-time items only | `payment` mode |
+| Any subscription item | `subscription` mode |
+
+<Warning>
+  You cannot mix subscription and one-time items in a single checkout.
+</Warning>
+
+## Subscription management
+
+Stripe handles all recurring billing for subscription products. When a buyer subscribes:
+
+- Stripe charges the buyer automatically on each billing cycle (daily, weekly, monthly, quarterly, semi-annual, or annual).
+- If a payment fails, Stripe retries according to its [smart retry](https://docs.stripe.com/billing/revenue-recovery/smart-retries) schedule.
+- When a subscription is cancelled or lapses, Crevio automatically revokes the buyer's access to the associated experiences.
+
+You can view and manage active subscriptions from the Stripe dashboard. Crevio stays in sync through Stripe webhooks.
+
+## Refund handling
+
+Refunds are processed through Stripe and reflected in Crevio automatically:
+
+- **Full refunds** -- The order status changes to **Refunded** and the buyer's experience access is revoked.
+- **Partial refunds** -- The order status changes to **Partially refunded**. Experience access is preserved unless you manually revoke it.
+
+You can issue refunds from your Stripe dashboard or through Crevio's embedded payment management panel in **Settings** > **Payments**.
+
+<Note>
+  If a price variant has limited inventory, refunding an order automatically restores the inventory count.
+</Note>
+
+## Payout configuration
+
+Payouts transfer your Stripe balance to your bank account. You can configure your payout schedule from **Settings** > **Payments** in Crevio.
+
+Available payout options:
+
+| Schedule | How it works |
+|----------|-------------|
+| **Daily** | Automatic daily transfers to your bank account |
+| **Weekly** | Transfers on a specific day of the week |
+| **Monthly** | Transfers on a specific day of the month |
+| **Manual** | You trigger payouts manually when you want |
+
+You can also request an **instant payout** for immediate access to your funds (subject to Stripe's instant payout eligibility and fees).
+
+## Test mode vs live mode
+
+Stripe provides separate test and live environments so you can verify your setup before accepting real payments.
+
+| Mode | When to use | Payment behavior |
+|------|------------|-----------------|
+| **Test mode** | During development and setup | Uses Stripe's test card numbers (e.g., `4242 4242 4242 4242`). No real charges are made. |
+| **Live mode** | After you have verified your integration | Processes real payments with real cards. |
+
+<Tip>
+  Use test mode to walk through the full checkout flow -- create a product, add a price variant, and complete a purchase with a test card -- before going live. This helps you verify that experience access, email confirmations, and webhooks all work as expected.
+</Tip>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I see 'Charges not enabled' when a buyer tries to check out">
+    Your Stripe account onboarding may be incomplete. Go to **Settings** > **Payments** and check for any pending requirements. Stripe may need additional identity verification or banking details before you can accept charges.
+  </Accordion>
+  <Accordion title="Payments are not showing up in Crevio">
+    Crevio relies on Stripe webhooks to process payments. If webhooks are misconfigured or Stripe is experiencing delays, there may be a lag. Check your Stripe dashboard's webhook logs for delivery failures.
+  </Accordion>
+  <Accordion title="I want to switch to a different Stripe account">
+    Contact [support@crevio.co](mailto:support@crevio.co) for assistance with reconnecting a different Stripe account. Existing orders and subscriptions are tied to your current Stripe account.
+  </Accordion>
+</AccordionGroup>

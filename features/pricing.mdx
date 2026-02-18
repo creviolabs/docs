@@ -1,0 +1,127 @@
+---
+title: "Pricing & price variants"
+description: "Set up flexible pricing with multiple tiers, subscriptions, pay-what-you-want, and more"
+---
+
+Price variants are how you define what a product costs and how buyers pay for it. Every product has at least one price variant, and you can add as many as you need to offer different pricing tiers from a single product page.
+
+## What are price variants?
+
+A price variant is a specific pricing option on a product. For example, a single course product might have:
+
+- A **free** tier that gives access to the first chapter
+- A **$49 one-time** tier for full course access
+- A **$9/month subscription** tier that includes the course plus ongoing community access
+
+Each variant can grant access to different [experiences](/features/experiences), so you can build tiered offerings without creating separate products.
+
+## Billing types
+
+Every price variant has a billing type that determines how and when the buyer is charged.
+
+### Free
+
+No payment is collected. The buyer completes checkout without entering payment details. Free variants are useful for lead magnets, free tiers, or gated content that you want people to sign up for.
+
+### One-time
+
+The buyer pays a single fixed amount and receives permanent access (unless you configure [auto-revoke](#auto-revoke-access)).
+
+### Subscription
+
+The buyer is charged on a recurring schedule. You choose the interval:
+
+| Interval | Billing cycle |
+|----------|--------------|
+| Daily | Every day |
+| Weekly | Every 7 days |
+| Bi-weekly | Every 14 days |
+| Monthly | Every month |
+| Quarterly | Every 3 months |
+| Semi-annual | Every 6 months |
+| Annual | Every year |
+
+<Note>
+  When a subscription is cancelled or lapses, the buyer's access to the associated experiences is revoked automatically.
+</Note>
+
+## Pay-what-you-want pricing
+
+For variants with the **custom** amount type, buyers choose how much they pay. You control the boundaries:
+
+- **Minimum amount** -- The lowest amount a buyer can enter
+- **Maximum amount** -- The highest amount a buyer can enter
+- **Preset amount** -- The suggested amount shown by default in the payment field
+
+<Tip>
+  Setting a thoughtful preset amount can significantly increase your average order value. Most buyers anchor on the suggested price rather than entering the minimum.
+</Tip>
+
+The preset amount must fall within the minimum and maximum range you define. If you set both a minimum and maximum, the minimum must be less than the maximum.
+
+## Strikethrough pricing
+
+You can set a **discounted from** amount on any fixed-price variant. This displays the original price with a strikethrough next to the current price, creating a visual discount indicator on your storefront. The discounted-from amount must be higher than the actual price.
+
+## Free trials
+
+Subscription variants can include a free trial period. Set the **trial period** in days -- the buyer signs up, gets immediate access, and is not charged until the trial expires.
+
+<Note>
+  Free trials are only available on subscription variants. They cannot be applied to one-time or free variants.
+</Note>
+
+## Inventory limits
+
+Set a **quantity available** on any price variant to limit how many times it can be purchased. Crevio tracks inventory with database-level locking to prevent overselling. Once the quantity reaches zero, the variant can no longer be purchased.
+
+Inventory is automatically restored if an order is refunded or cancelled.
+
+## Seat-based pricing
+
+For variants that grant access to a team or group, you can set a **seat quantity**. This defines how many seats (user slots) are included in a single purchase. Seat-based pricing is available on fixed-price and free variants.
+
+## Auto-revoke access
+
+Set **revoke after days** on a price variant to automatically remove the buyer's access after a certain number of days. This is useful for:
+
+- Time-limited content (e.g., a 30-day challenge)
+- Rental-style access to digital downloads
+- Trial periods on one-time purchases
+
+## Waitlists
+
+When a variant's inventory is sold out, you can enable a **waitlist**. Interested buyers can join the waitlist, and you will be notified so you can follow up or restock.
+
+## Cross-sell recommendations
+
+You can link price variants to other variants as cross-sells. When a buyer adds a product to their cart or reaches checkout, Crevio displays the cross-sold products as recommendations, encouraging additional purchases.
+
+<Tip>
+  Cross-sells work best when the recommended product complements what the buyer is already purchasing -- for example, suggesting a templates pack alongside a course.
+</Tip>
+
+## Benefits list
+
+Each price variant has a **benefits** list -- a set of bullet points that describe what the buyer gets. Benefits are displayed on your storefront's product page alongside the variant's price, helping buyers compare tiers at a glance.
+
+<Accordion title="Example: course product with three tiers">
+
+| | Free | Pro ($49) | VIP ($99) |
+|---|---|---|---|
+| Access to Chapter 1 | Yes | Yes | Yes |
+| Full course access | -- | Yes | Yes |
+| Downloadable resources | -- | Yes | Yes |
+| Private Discord community | -- | -- | Yes |
+| 1-on-1 coaching call | -- | -- | Yes |
+
+Each column is a separate price variant with its own benefits list and attached experiences.
+
+</Accordion>
+
+## Managing price variants
+
+- A product must have at least one active (non-archived) price variant at all times.
+- You can **archive** a variant to hide it from your storefront without deleting it. Archived variants cannot be the last active variant on a product.
+- Variants that have been synced to Stripe or have existing purchases cannot be deleted, but they can be archived.
+- Drag variants to reorder them. The first active variant is treated as the default on your storefront.
