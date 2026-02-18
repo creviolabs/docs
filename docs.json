@@ -12,7 +12,6 @@
 		"products": [
 			{
 				"product": "For Creators",
-				"icon": "palette",
 				"tabs": [
 					{
 						"tab": "Introduction",
@@ -103,7 +102,6 @@
 			},
 			{
 				"product": "For Developers",
-				"icon": "code",
 				"tabs": [
 					{
 						"tab": "Guides",
@@ -143,8 +141,8 @@
 		]
 	},
 	"logo": {
-		"light": "/logo/light.svg",
-		"dark": "/logo/dark.svg"
+		"light": "/logo/light.png",
+		"dark": "/logo/dark.png"
 	},
 	"navbar": {
 		"links": [
