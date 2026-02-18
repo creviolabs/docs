@@ -1,33 +1,116 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "API reference"
+description: "Programmatically manage your Crevio storefront"
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+The Crevio API lets you manage products, pricing, checkouts, orders, customers, and more. All endpoints return JSON and use standard HTTP methods.
 
-## Welcome
+## Base URL
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+```
+https://api.crevio.co/v1
+```
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+For local development:
+
+```
+https://api.crevio.localhost/v1
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API requests require a Bearer token in the `Authorization` header.
+
+```bash
+curl https://api.crevio.co/v1/products \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+Generate API tokens from **Settings > Developer > API tokens** in your dashboard.
+
+<Warning>
+  Keep your API tokens secure. Do not expose them in client-side code or public repositories.
+</Warning>
+
+## Pagination
+
+List endpoints return paginated results with this structure:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+{
+  "items": [...],
+  "pagination": {
+    "count": 50,
+    "page": 1,
+    "pages": 5,
+    "limit": 20,
+    "offset": 0,
+    "from": 1,
+    "to": 20,
+    "in": 20,
+    "last": 5,
+    "next": 2,
+    "previous": null
   }
-]
+}
 ```
+
+Use `page` and `limit` query parameters to navigate results. Default limit is 20, maximum is 100.
+
+## Expandable fields
+
+Some endpoints support an `expand` query parameter to include related data. Pass a comma-separated list of fields:
+
+```bash
+curl "https://api.crevio.co/v1/orders?expand=line_items,customer,discount"
+```
+
+## Errors
+
+All errors follow this format:
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "Validation failed",
+    "details": {
+      "email": ["is required"]
+    }
+  }
+}
+```
+
+| Status | Type | Description |
+|--------|------|-------------|
+| 400 | `parameter_missing` | A required parameter is missing |
+| 401 | `unauthorized` | Invalid or missing API token |
+| 404 | `not_found` | Resource not found |
+| 422 | `validation_error` | Request failed validation |
+| 500 | `error` | Internal server error |
+
+## SDKs
+
+### TypeScript
+
+Install the official SDK:
+
+```bash
+npm install @crevio/sdk
+```
+
+```typescript
+import { Crevio } from "@crevio/sdk";
+
+const crevio = new Crevio({
+  security: {
+    apiKey: "YOUR_API_TOKEN",
+  },
+});
+
+const products = await crevio.products.list();
+```
+
+<Card title="Full endpoint reference" icon="code" href="/api-reference/introduction">
+  Browse all available endpoints below.
+</Card>
