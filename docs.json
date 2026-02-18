@@ -1,11 +1,11 @@
 {
 	"$schema": "https://mintlify.com/docs.json",
-	"theme": "mint",
+	"theme": "palm",
 	"name": "Crevio",
 	"colors": {
-		"primary": "#171717",
-		"light": "#737373",
-		"dark": "#0A0A0A"
+		"primary": "#222222",
+		"light": "#dddddd",
+		"dark": "#111111"
 	},
 	"favicon": "/favicon.ico",
 	"navigation": {
