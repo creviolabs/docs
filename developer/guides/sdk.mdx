@@ -27,9 +27,7 @@ pnpm add @crevio/sdk
 import { Crevio } from "@crevio/sdk";
 
 const crevio = new Crevio({
-  security: {
-    apiKey: "YOUR_API_TOKEN",
-  },
+  apiKeyAuth: "YOUR_API_TOKEN",
 });
 ```
 
@@ -38,10 +36,10 @@ const crevio = new Crevio({
 ### List products
 
 ```typescript
-const { items } = await crevio.products.list();
+const products = await crevio.products.list();
 
-for (const product of items) {
-  console.log(product.name, product.prefixId);
+for (const product of products) {
+  console.log(product.name, product.id);
 }
 ```
 
@@ -49,8 +47,21 @@ for (const product of items) {
 
 ```typescript
 const product = await crevio.products.get({
-  prefixId: "prd_abc123",
+  prefixId: "prod_abc123",
 });
+```
+
+### Get a product with reviews expanded
+
+```typescript
+const product = await crevio.products.get({
+  prefixId: "prod_abc123",
+  expand: "reviews",
+});
+
+for (const review of product.reviews ?? []) {
+  console.log(review.rating, review.customerName, review.content);
+}
 ```
 
 ### Create a checkout
@@ -58,22 +69,24 @@ const product = await crevio.products.get({
 ```typescript
 const checkout = await crevio.checkouts.create({
   checkout: {
-    checkoutItemsAttributes: [
+    email: "customer@example.com",
+    lineItems: [
       {
-        priceVariantId: 1,
+        priceVariant: "pv_xyz789",
         quantity: 1,
       },
     ],
   },
 });
+
+console.log(checkout.clientSecret); // Use with Stripe.js
 ```
 
 ### List orders with expanded data
 
 ```typescript
-const { items, pagination } = await crevio.orders.list({
+const orders = await crevio.orders.list({
   expand: "line_items,customer",
-  page: 1,
   limit: 50,
 });
 ```
@@ -104,6 +117,45 @@ const discount = await crevio.discounts.create({
 });
 ```
 
+### Manage webhook endpoints
+
+```typescript
+// Create a webhook endpoint
+const webhook = await crevio.webhookEndpoints.create({
+  webhookEndpoint: {
+    url: "https://example.com/webhooks/crevio",
+    enabledEvents: ["order.paid", "checkout.created"],
+  },
+});
+
+// Save the secret for signature verification
+console.log(webhook.secret);
+
+// List available event types
+const events = await crevio.webhookEndpoints.listEvents();
+```
+
+### Manage carts
+
+```typescript
+// Create a cart for a customer
+const cart = await crevio.carts.create({
+  cart: {
+    customer: "cust_abc123",
+  },
+});
+
+// Add items to cart
+const updatedCart = await crevio.carts.update({
+  prefixId: cart.id,
+  cart: {
+    cartItemsAttributes: [
+      { priceVariant: "pv_xyz789", quantity: 1 },
+    ],
+  },
+});
+```
+
 ## Error handling
 
 The SDK throws typed errors that you can catch:
@@ -111,7 +163,7 @@ The SDK throws typed errors that you can catch:
 ```typescript
 try {
   const product = await crevio.products.get({
-    prefixId: "prd_nonexistent",
+    prefixId: "prod_nonexistent",
   });
 } catch (error) {
   if (error.statusCode === 404) {

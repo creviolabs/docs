@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Crevio API",
-    "description": "The Crevio API allows you to programmatically manage your creator storefront — products, pricing, checkouts, orders, customers, and more.",
-    "version": "1.0.0",
+    "description": "API for the Crevio creator platform \u2014 a multi-tenant SaaS for digital product sales.\nUses snake_case keys following Stripe conventions. All resource IDs are string prefix IDs (e.g., \"prod_abc123\").\n",
+    "version": "0.4.0",
     "contact": {
       "name": "Crevio Support",
       "url": "https://crevio.co"
@@ -30,8 +30,14 @@
         "description": "Returns information about the authenticated account",
         "operationId": "getAccount",
         "x-speakeasy-name-override": "get",
-        "tags": ["Account"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Account"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Account information",
@@ -55,18 +61,45 @@
         "description": "Returns a list of published products for the current account",
         "operationId": "listProducts",
         "x-speakeasy-name-override": "list",
-        "tags": ["Products"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Search by product name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: reviews",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of products",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Product"
-                  }
+                  "$ref": "#/components/schemas/ListResponse_Product"
                 }
               }
             }
@@ -83,10 +116,26 @@
         "description": "Returns detailed information about a specific product",
         "operationId": "getProduct",
         "x-speakeasy-name-override": "get",
-        "tags": ["Products"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: reviews",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -108,34 +157,85 @@
         }
       }
     },
-    "/price_variants": {
-      "get": {
-        "summary": "List price variants",
-        "description": "Returns all price variants for the current account. Optionally filter by product.",
-        "operationId": "listPriceVariants",
-        "x-speakeasy-name-override": "list",
-        "tags": ["PriceVariants"],
-        "security": [{ "ApiKeyAuth": [] }],
+    "/products/{prefix_id}/x402_access": {
+      "post": {
+        "summary": "Request x402 payment access",
+        "description": "Returns 402 with payment requirements, or grants access on valid x402 payment.\nPass a price_variant query param to select a specific variant, otherwise the first visible variant is used.\n",
+        "operationId": "requestX402Access",
+        "x-speakeasy-name-override": "requestX402Access",
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "product_id",
+            "$ref": "#/components/parameters/PrefixId"
+          },
+          {
+            "name": "price_variant",
             "in": "query",
-            "description": "Filter price variants by product prefix ID",
-            "required": false,
+            "description": "Price variant prefix ID to use for payment",
             "schema": {
               "type": "string"
             }
-          },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of price variants",
+            "description": "Access granted after valid x402 payment",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedPriceVariants"
+                  "$ref": "#/components/schemas/X402Access"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required \u2014 includes x402 payment requirements in response headers"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/price_variants": {
+      "get": {
+        "summary": "List price variants",
+        "description": "Returns all price variants for the current account",
+        "operationId": "listPriceVariants",
+        "x-speakeasy-name-override": "list",
+        "tags": [
+          "PriceVariants"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of price variants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_PriceVariant"
                 }
               }
             }
@@ -152,10 +252,18 @@
         "description": "Returns a specific price variant",
         "operationId": "getPriceVariant",
         "x-speakeasy-name-override": "get",
-        "tags": ["PriceVariants"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "PriceVariants"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -180,31 +288,40 @@
     "/reviews": {
       "get": {
         "summary": "List reviews",
-        "description": "Returns reviews for products in the current account. Optionally filter by product.",
+        "description": "Returns reviews for products in the current account",
         "operationId": "listReviews",
         "x-speakeasy-name-override": "list",
-        "tags": ["Reviews"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "product_id",
+            "name": "product",
             "in": "query",
-            "description": "Filter reviews by product prefix ID",
-            "required": false,
+            "description": "Filter by product prefix ID",
             "schema": {
               "type": "string"
             }
           },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of reviews",
+            "description": "List of reviews",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedReviews"
+                  "$ref": "#/components/schemas/ListResponse_Review"
                 }
               }
             }
@@ -221,10 +338,18 @@
         "description": "Returns a specific review",
         "operationId": "getReview",
         "x-speakeasy-name-override": "get",
-        "tags": ["Reviews"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -252,8 +377,14 @@
         "description": "Creates a new checkout session for purchasing products",
         "operationId": "createCheckout",
         "x-speakeasy-name-override": "create",
-        "tags": ["Checkouts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Checkouts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -290,10 +421,18 @@
         "description": "Returns a specific checkout session",
         "operationId": "getCheckout",
         "x-speakeasy-name-override": "get",
-        "tags": ["Checkouts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Checkouts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -319,10 +458,18 @@
         "description": "Updates an existing checkout session",
         "operationId": "updateCheckout",
         "x-speakeasy-name-override": "update",
-        "tags": ["Checkouts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Checkouts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -363,10 +510,16 @@
         "description": "Creates a new shopping cart",
         "operationId": "createCart",
         "x-speakeasy-name-override": "create",
-        "tags": ["Carts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Carts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -401,10 +554,18 @@
         "description": "Returns a specific cart",
         "operationId": "getCart",
         "x-speakeasy-name-override": "get",
-        "tags": ["Carts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Carts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -430,10 +591,18 @@
         "description": "Updates cart items",
         "operationId": "updateCart",
         "x-speakeasy-name-override": "update",
-        "tags": ["Carts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Carts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -472,10 +641,18 @@
         "description": "Deletes a cart",
         "operationId": "deleteCart",
         "x-speakeasy-name-override": "delete",
-        "tags": ["Carts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Carts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -483,7 +660,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/DeleteResponse"
                 }
               }
             }
@@ -500,11 +677,17 @@
     "/orders": {
       "get": {
         "summary": "List orders",
-        "description": "Returns a paginated list of orders for the current account",
+        "description": "Returns a list of orders for the current account",
         "operationId": "listOrders",
         "x-speakeasy-name-override": "list",
-        "tags": ["Orders"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "status",
@@ -512,11 +695,17 @@
             "description": "Filter by order status",
             "schema": {
               "type": "string",
-              "enum": ["succeeded", "pending", "failed", "refunded", "partially_refunded"]
+              "enum": [
+                "succeeded",
+                "pending",
+                "failed",
+                "refunded",
+                "partially_refunded"
+              ]
             }
           },
           {
-            "name": "customer_id",
+            "name": "customer",
             "in": "query",
             "description": "Filter by customer prefix ID",
             "schema": {
@@ -524,23 +713,35 @@
             }
           },
           {
-            "name": "expand",
+            "name": "processor",
             "in": "query",
-            "description": "Comma-separated relations to expand: line_items, customer, discount, access_tokens, seller_account, charge",
+            "description": "Filter by payment processor",
             "schema": {
               "type": "string"
             }
           },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: customer, line_items",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of orders",
+            "description": "List of orders",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedOrders"
+                  "$ref": "#/components/schemas/ListResponse_Order"
                 }
               }
             }
@@ -557,14 +758,22 @@
         "description": "Returns a specific order",
         "operationId": "getOrder",
         "x-speakeasy-name-override": "get",
-        "tags": ["Orders"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" },
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          },
           {
             "name": "expand",
             "in": "query",
-            "description": "Comma-separated relations to expand: line_items, customer, discount, access_tokens, seller_account, charge",
+            "description": "Comma-separated relations to expand: customer, line_items",
             "schema": {
               "type": "string"
             }
@@ -593,11 +802,17 @@
     "/customers": {
       "get": {
         "summary": "List customers",
-        "description": "Returns a paginated list of customers for the current account",
+        "description": "Returns a list of customers for the current account",
         "operationId": "listCustomers",
         "x-speakeasy-name-override": "list",
-        "tags": ["Customers"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Customers"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "customer_type",
@@ -605,7 +820,11 @@
             "description": "Filter by customer type",
             "schema": {
               "type": "string",
-              "enum": ["lead", "free", "paid"]
+              "enum": [
+                "lead",
+                "free",
+                "paid"
+              ]
             }
           },
           {
@@ -616,16 +835,20 @@
               "type": "string"
             }
           },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of customers",
+            "description": "List of customers",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedCustomers"
+                  "$ref": "#/components/schemas/ListResponse_Customer"
                 }
               }
             }
@@ -640,8 +863,14 @@
         "description": "Creates a new customer record",
         "operationId": "createCustomer",
         "x-speakeasy-name-override": "create",
-        "tags": ["Customers"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Customers"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -678,10 +907,18 @@
         "description": "Returns a specific customer",
         "operationId": "getCustomer",
         "x-speakeasy-name-override": "get",
-        "tags": ["Customers"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Customers"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -707,10 +944,18 @@
         "description": "Updates an existing customer record",
         "operationId": "updateCustomer",
         "x-speakeasy-name-override": "update",
-        "tags": ["Customers"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Customers"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -748,11 +993,17 @@
     "/discounts": {
       "get": {
         "summary": "List discounts",
-        "description": "Returns a paginated list of discounts for the current account",
+        "description": "Returns a list of discounts for the current account",
         "operationId": "listDiscounts",
         "x-speakeasy-name-override": "list",
-        "tags": ["Discounts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Discounts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "status",
@@ -760,19 +1011,35 @@
             "description": "Filter by discount status",
             "schema": {
               "type": "string",
-              "enum": ["active", "expired", "scheduled"]
+              "enum": [
+                "active",
+                "expired",
+                "scheduled"
+              ]
             }
           },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Search by discount code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of discounts",
+            "description": "List of discounts",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedDiscounts"
+                  "$ref": "#/components/schemas/ListResponse_Discount"
                 }
               }
             }
@@ -787,8 +1054,14 @@
         "description": "Creates a new discount code",
         "operationId": "createDiscount",
         "x-speakeasy-name-override": "create",
-        "tags": ["Discounts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Discounts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -825,10 +1098,18 @@
         "description": "Returns a specific discount",
         "operationId": "getDiscount",
         "x-speakeasy-name-override": "get",
-        "tags": ["Discounts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Discounts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -854,10 +1135,18 @@
         "description": "Updates an existing discount",
         "operationId": "updateDiscount",
         "x-speakeasy-name-override": "update",
-        "tags": ["Discounts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Discounts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -896,10 +1185,18 @@
         "description": "Deletes a discount",
         "operationId": "deleteDiscount",
         "x-speakeasy-name-override": "delete",
-        "tags": ["Discounts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Discounts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -907,7 +1204,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/DeleteResponse"
                 }
               }
             }
@@ -924,22 +1221,40 @@
     "/checkout_links": {
       "get": {
         "summary": "List checkout links",
-        "description": "Returns a paginated list of checkout links for the current account",
+        "description": "Returns a list of checkout links for the current account",
         "operationId": "listCheckoutLinks",
         "x-speakeasy-name-override": "list",
-        "tags": ["CheckoutLinks"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "CheckoutLinks"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: discount, price_variants",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of checkout links",
+            "description": "List of checkout links",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedCheckoutLinks"
+                  "$ref": "#/components/schemas/ListResponse_CheckoutLink"
                 }
               }
             }
@@ -954,8 +1269,14 @@
         "description": "Creates a new shareable checkout link",
         "operationId": "createCheckoutLink",
         "x-speakeasy-name-override": "create",
-        "tags": ["CheckoutLinks"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "CheckoutLinks"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -992,10 +1313,26 @@
         "description": "Returns a specific checkout link",
         "operationId": "getCheckoutLink",
         "x-speakeasy-name-override": "get",
-        "tags": ["CheckoutLinks"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "CheckoutLinks"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: discount, price_variants",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -1021,10 +1358,18 @@
         "description": "Updates an existing checkout link",
         "operationId": "updateCheckoutLink",
         "x-speakeasy-name-override": "update",
-        "tags": ["CheckoutLinks"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "CheckoutLinks"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1063,10 +1408,18 @@
         "description": "Deletes a checkout link",
         "operationId": "deleteCheckoutLink",
         "x-speakeasy-name-override": "delete",
-        "tags": ["CheckoutLinks"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "CheckoutLinks"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -1074,7 +1427,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/DeleteResponse"
                 }
               }
             }
@@ -1091,30 +1444,40 @@
     "/experiences": {
       "get": {
         "summary": "List experiences",
-        "description": "Returns a paginated list of experiences for the current account",
+        "description": "Returns a list of experiences for the current account",
         "operationId": "listExperiences",
         "x-speakeasy-name-override": "list",
-        "tags": ["Experiences"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Experiences"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "type",
+            "name": "item_type",
             "in": "query",
-            "description": "Filter by experience type (e.g. Community, Course, Download)",
+            "description": "Filter by experience type (e.g., Community, Course, Download)",
             "schema": {
               "type": "string"
             }
           },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of experiences",
+            "description": "List of experiences",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedExperiences"
+                  "$ref": "#/components/schemas/ListResponse_Experience"
                 }
               }
             }
@@ -1131,10 +1494,18 @@
         "description": "Returns a specific experience",
         "operationId": "getExperience",
         "x-speakeasy-name-override": "get",
-        "tags": ["Experiences"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "Experiences"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -1159,30 +1530,48 @@
     "/blog_posts": {
       "get": {
         "summary": "List blog posts",
-        "description": "Returns a paginated list of published blog posts",
+        "description": "Returns a list of published blog posts",
         "operationId": "listBlogPosts",
         "x-speakeasy-name-override": "list",
-        "tags": ["BlogPosts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "BlogPosts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "category_id",
+            "name": "category",
             "in": "query",
             "description": "Filter by category slug",
             "schema": {
               "type": "string"
             }
           },
-          { "$ref": "#/components/parameters/Page" },
-          { "$ref": "#/components/parameters/Limit" }
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Search by title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of blog posts",
+            "description": "List of blog posts",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedBlogPosts"
+                  "$ref": "#/components/schemas/ListResponse_BlogPost"
                 }
               }
             }
@@ -1199,10 +1588,18 @@
         "description": "Returns a specific published blog post",
         "operationId": "getBlogPost",
         "x-speakeasy-name-override": "get",
-        "tags": ["BlogPosts"],
-        "security": [{ "ApiKeyAuth": [] }],
+        "tags": [
+          "BlogPosts"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PrefixId" }
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
         ],
         "responses": {
           "200": {
@@ -1223,6 +1620,397 @@
           }
         }
       }
+    },
+    "/webhook_endpoints": {
+      "get": {
+        "summary": "List webhook endpoints",
+        "description": "Returns a list of webhook endpoints for the current account",
+        "operationId": "listWebhookEndpoints",
+        "x-speakeasy-name-override": "list",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "disabled"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of webhook endpoints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_WebhookEndpoint"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create webhook endpoint",
+        "description": "Creates a new webhook endpoint. The secret is only returned on creation.",
+        "operationId": "createWebhookEndpoint",
+        "x-speakeasy-name-override": "create",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEndpointRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook endpoint created (includes secret)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEndpointWithSecret"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/webhook_endpoints/events": {
+      "get": {
+        "summary": "List available webhook event types",
+        "description": "Returns a list of all available event types that can be subscribed to",
+        "operationId": "listWebhookEvents",
+        "x-speakeasy-name-override": "listEvents",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of event types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/webhook_endpoints/{prefix_id}": {
+      "get": {
+        "summary": "Get webhook endpoint",
+        "description": "Returns a specific webhook endpoint",
+        "operationId": "getWebhookEndpoint",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook endpoint details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEndpoint"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update webhook endpoint",
+        "description": "Updates an existing webhook endpoint",
+        "operationId": "updateWebhookEndpoint",
+        "x-speakeasy-name-override": "update",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEndpointRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook endpoint updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEndpoint"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete webhook endpoint",
+        "description": "Deletes a webhook endpoint",
+        "operationId": "deleteWebhookEndpoint",
+        "x-speakeasy-name-override": "delete",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook endpoint deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/webhook_endpoints/{prefix_id}/test": {
+      "post": {
+        "summary": "Test webhook endpoint",
+        "description": "Sends a test event to the webhook endpoint",
+        "operationId": "testWebhookEndpoint",
+        "x-speakeasy-name-override": "test",
+        "tags": [
+          "WebhookEndpoints"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "description": "The event type to send as a test",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Test event delivered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "delivered": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "502": {
+            "description": "Webhook delivery failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402_configuration": {
+      "get": {
+        "summary": "Get x402 configuration",
+        "description": "Returns the x402 payment configuration for the current account",
+        "operationId": "getX402Configuration",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "X402Configuration"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "X402 configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402Configuration"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update x402 configuration",
+        "description": "Updates the x402 payment configuration",
+        "operationId": "updateX402Configuration",
+        "x-speakeasy-name-override": "update",
+        "tags": [
+          "X402Configuration"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/X402ConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "X402 configuration updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402Configuration"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1239,19 +2027,17 @@
         "name": "prefix_id",
         "in": "path",
         "required": true,
-        "description": "The resource prefix ID",
+        "description": "The resource prefix ID (e.g., \"prod_abc123\")",
         "schema": {
           "type": "string"
         }
       },
-      "Page": {
-        "name": "page",
+      "StartingAfter": {
+        "name": "starting_after",
         "in": "query",
-        "description": "Page number (1-based)",
+        "description": "Cursor for pagination \u2014 the prefix ID of the last item in the previous page",
         "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "default": 1
+          "type": "string"
         }
       },
       "Limit": {
@@ -1267,46 +2053,270 @@
       }
     },
     "schemas": {
-      "Pagination": {
+      "ListResponse_Product": {
         "type": "object",
         "properties": {
-          "count": { "type": "integer" },
-          "from": { "type": "integer" },
-          "in": { "type": "integer" },
-          "last": { "type": "integer" },
-          "limit": { "type": "integer" },
-          "next": { "type": "integer", "nullable": true },
-          "previous": { "type": "integer", "nullable": true },
-          "offset": { "type": "integer" },
-          "page": { "type": "integer" },
-          "pages": { "type": "integer" },
-          "to": { "type": "integer" }
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_PriceVariant": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceVariant"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Review": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Order": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Customer": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Customer"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Discount": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Discount"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_CheckoutLink": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutLink"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Experience": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Experience"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_BlogPost": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlogPost"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_WebhookEndpoint": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookEndpoint"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
         }
       },
       "Account": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "subdomain": { "type": "string" },
-          "avatar": {
-            "nullable": true,
-            "allOf": [{ "$ref": "#/components/schemas/ImageAttachment" }]
-          },
-          "linkInBioPage": {
-            "$ref": "#/components/schemas/LinkInBioPage"
-          },
-          "socialLinks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SocialLink"
-            }
-          },
-          "referralUrl": {
+          "id": {
             "type": "string",
-            "format": "uri"
+            "description": "Prefix ID (e.g., \"acct_abc123\")"
           },
-          "availableSupportEmail": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "account"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "subdomain": {
             "type": "string"
           }
         }
@@ -1314,288 +2324,831 @@
       "Product": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "slug": { "type": "string" },
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (e.g., \"prod_abc123\")"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "product"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
-            "enum": ["draft", "active", "archived"]
+            "enum": [
+              "draft",
+              "active",
+              "archived"
+            ]
           },
-          "description": { "type": "string" },
-          "bodyHtml": { "type": "string" },
-          "buttonCta": { "type": "string" },
-          "prefixId": { "type": "string" },
-          "sellerAccount": {
-            "$ref": "#/components/schemas/Account"
+          "description": {
+            "type": "string",
+            "nullable": true
           },
-          "mediaItems": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "price_variants": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MediaItem"
-            }
-          },
-          "reviews": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Review"
-            }
-          },
-          "seo": {
-            "$ref": "#/components/schemas/Seo"
-          },
-          "priceVariants": {
-            "type": "array",
+            "description": "Always included \u2014 visible, non-archived variants ordered by position",
             "items": {
               "$ref": "#/components/schemas/PriceVariant"
             }
           },
-          "url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "hasMedia": { "type": "boolean" }
-        }
-      },
-      "ProductSlim": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "slug": { "type": "string" },
-          "prefixId": { "type": "string" },
-          "url": {
-            "type": "string",
-            "format": "uri"
+          "reviews": {
+            "type": "array",
+            "description": "Only included when expand=reviews",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
           }
         }
       },
       "PriceVariant": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (e.g., \"pv_abc123\")"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "price_variant"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
           "amount": {
             "type": "integer",
             "description": "Price in cents"
           },
-          "currency": { "type": "string" },
-          "billingType": {
+          "amount_type": {
             "type": "string",
-            "enum": ["one_time", "recurring", "free"]
+            "description": "Pricing model (e.g., \"fixed\", \"pay_what_you_want\")"
           },
-          "amountType": {
+          "billing_type": {
             "type": "string",
-            "description": "Pricing type (e.g. fixed, pay_what_you_want)"
+            "enum": [
+              "one_time",
+              "subscription",
+              "free"
+            ]
           },
-          "discountedFromAmount": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Original price in cents for showing a discount"
-          },
-          "presetAmount": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Preset amount in cents for pay-what-you-want pricing"
-          },
-          "minimumAmount": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Minimum amount in cents for pay-what-you-want pricing"
-          },
-          "maximumAmount": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Maximum amount in cents for pay-what-you-want pricing"
-          },
-          "recurringInterval": {
+          "recurring_interval": {
             "type": "string",
             "nullable": true,
-            "description": "Subscription interval (e.g. month, year)"
+            "description": "Billing interval for subscriptions (e.g., \"month\", \"year\")"
           },
-          "intervalCount": {
+          "interval_count": {
             "type": "integer",
             "nullable": true,
-            "description": "Number of intervals between subscription billings"
+            "description": "Number of intervals between billings"
           },
-          "trialPeriodDays": {
+          "trial_period_days": {
             "type": "integer",
             "nullable": true
           },
-          "revokeAfterDays": {
+          "revoke_after_days": {
             "type": "integer",
             "nullable": true,
-            "description": "Automatically revoke access after this many days"
+            "description": "Days after which access is revoked"
           },
-          "hidden": { "type": "boolean" },
-          "archived": { "type": "boolean" },
-          "waitlist": {
-            "type": "boolean",
-            "description": "Whether waitlist is enabled for this variant"
-          },
-          "position": { "type": "integer" },
-          "prefixId": { "type": "string" },
-          "benefits": {
-            "type": "array",
-            "nullable": true,
-            "description": "List of benefit descriptions for this variant",
-            "items": { "type": "string" }
-          },
-          "seatQuantity": {
+          "quantity_available": {
             "type": "integer",
             "nullable": true,
-            "description": "Number of seats per purchase"
+            "description": "Inventory limit (null = unlimited)"
           },
-          "isDefault": { "type": "boolean" },
-          "isPayWhatYouWant": { "type": "boolean" },
-          "hasFreeTrial": { "type": "boolean" },
-          "isQuantityLimited": { "type": "boolean" }
-        }
-      },
-      "PaginatedPriceVariants": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PriceVariant"
-            }
+          "currency": {
+            "type": "string"
           },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
+          "archived": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "product": {
+            "type": "string",
+            "description": "Product prefix ID"
+          },
+          "x402_amount": {
+            "type": "string",
+            "nullable": true,
+            "description": "USDC atomic units (6 decimals). $5.00 \u2192 \"5000000\""
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
       "Review": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "review"
+            ]
+          },
           "rating": {
             "type": "integer",
             "minimum": 1,
             "maximum": 5
           },
+          "customer_name": {
+            "type": "string"
+          },
           "content": {
-            "type": "string",
-            "description": "The review text content"
+            "type": "string"
           },
-          "customerName": {
-            "type": "string",
-            "description": "Name of the customer who wrote the review"
-          },
-          "customerImage": {
-            "nullable": true,
-            "description": "Avatar image of the customer",
-            "allOf": [{ "$ref": "#/components/schemas/ImageAttachment" }]
-          },
-          "position": {
-            "type": "integer",
-            "description": "Display position of the review"
-          },
-          "prefixId": { "type": "string" },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "PaginatedReviews": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Review"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
           }
         }
       },
       "CheckoutItem": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "quantity": { "type": "integer" },
-          "priceVariant": {
-            "$ref": "#/components/schemas/PriceVariant"
+          "object": {
+            "type": "string",
+            "enum": [
+              "checkout_item"
+            ]
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price_variant": {
+            "type": "string",
+            "description": "Price variant prefix ID"
           },
           "product": {
-            "$ref": "#/components/schemas/ProductSlim"
+            "type": "string",
+            "description": "Product prefix ID"
           }
         }
       },
       "Checkout": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "status": { "type": "string" },
-          "processorId": {
+          "id": {
             "type": "string",
-            "nullable": true
+            "description": "Prefix ID"
           },
-          "clientSecret": {
+          "object": {
             "type": "string",
-            "nullable": true
+            "enum": [
+              "checkout"
+            ]
           },
-          "prefixId": { "type": "string" },
-          "mode": { "type": "string" },
-          "currency": { "type": "string" },
+          "status": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "description": "Payment mode (e.g., payment, subscription)"
+          },
+          "currency": {
+            "type": "string"
+          },
           "total": {
             "type": "integer",
             "description": "Total in cents"
           },
-          "isFree": { "type": "boolean" },
-          "prefilledEmail": {
+          "client_secret": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Stripe client secret for completing payment"
           },
-          "checkoutItems": {
+          "checkout_items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CheckoutItem"
             }
           },
-          "sellerAccount": {
-            "$ref": "#/components/schemas/Account"
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "cart_item"
+            ]
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price_variant": {
+            "type": "string",
+            "description": "Price variant prefix ID"
+          },
+          "product": {
+            "type": "string",
+            "description": "Product prefix ID"
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "cart"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total in cents"
+          },
+          "cart_items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            }
+          }
+        }
+      },
+      "OrderLineItem": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "order_line_item"
+            ]
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price_variant": {
+            "type": "string",
+            "description": "Price variant prefix ID"
+          },
+          "product": {
+            "type": "string",
+            "description": "Product prefix ID"
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "order"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "pending",
+              "failed",
+              "refunded",
+              "partially_refunded"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Order total in cents"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customer": {
+            "description": "Customer prefix ID by default. When expand=customer, returns a full Customer object.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Customer"
+              }
+            ]
+          },
+          "line_items": {
+            "type": "array",
+            "description": "Only included when expand=line_items",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          },
+          "checkout": {
+            "type": "string",
+            "description": "Checkout prefix ID"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "customer"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "customer_type": {
+            "type": "string",
+            "enum": [
+              "lead",
+              "free",
+              "paid"
+            ]
+          },
+          "orders_count": {
+            "type": "integer"
+          },
+          "total_spend": {
+            "type": "integer",
+            "description": "Total spend in cents"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Discount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "discount"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "expired",
+              "scheduled"
+            ]
+          },
+          "discount_type": {
+            "type": "string",
+            "enum": [
+              "amount_off",
+              "percent_off"
+            ]
+          },
+          "code": {
+            "type": "string"
+          },
+          "amount_off": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Discount amount in cents"
+          },
+          "percent_off": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "duration": {
+            "type": "string",
+            "enum": [
+              "once",
+              "forever",
+              "repeating"
+            ],
+            "nullable": true
+          },
+          "duration_in_months": {
+            "type": "integer",
+            "nullable": true
+          },
+          "max_redemptions": {
+            "type": "integer",
+            "nullable": true
+          },
+          "times_redeemed": {
+            "type": "integer"
+          },
+          "redeem_by": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CheckoutLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "checkout_link"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "success_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "allow_discount_codes": {
+            "type": "boolean"
+          },
+          "discount": {
+            "description": "Discount prefix ID by default. When expand=discount, returns a full Discount object.\n",
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Discount"
+              }
+            ]
+          },
+          "price_variants": {
+            "type": "array",
+            "description": "Only included when expand=price_variants",
+            "items": {
+              "$ref": "#/components/schemas/PriceVariant"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Experience": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "experience"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "access_type": {
+            "type": "string"
+          },
+          "item_type": {
+            "type": "string",
+            "description": "Experience type (e.g., Community, Course, Download)"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BlogPost": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "blog_post"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "scheduled"
+            ]
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true,
+            "description": "Category slug (e.g., \"tutorials\")"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookEndpoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "webhook_endpoint"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "api_version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled"
+            ]
+          },
+          "enabled_events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookEndpointWithSecret": {
+        "description": "Returned only on creation \u2014 includes the signing secret",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookEndpoint"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "secret": {
+                "type": "string",
+                "description": "Signing secret (only revealed on creation)"
+              }
+            }
+          }
+        ]
+      },
+      "X402Configuration": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "x402_configuration"
+            ]
+          },
+          "x402_enabled": {
+            "type": "boolean"
+          },
+          "x402_wallet_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "x402_chain": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USDC"
+            ]
+          }
+        }
+      },
+      "X402Access": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "x402_access"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Order prefix ID"
+          },
+          "product": {
+            "type": "string",
+            "description": "Product prefix ID"
+          },
+          "price_variant": {
+            "type": "string",
+            "description": "Price variant prefix ID"
+          },
+          "order": {
+            "type": "string",
+            "description": "Order prefix ID"
+          },
+          "access_token": {
+            "type": "string",
+            "nullable": true
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
       "CheckoutCreateRequest": {
         "type": "object",
-        "required": ["checkout"],
+        "required": [
+          "checkout"
+        ],
         "properties": {
           "checkout": {
             "type": "object",
-            "required": ["checkout_items_attributes"],
+            "required": [
+              "line_items"
+            ],
             "properties": {
               "email": {
                 "type": "string",
-                "format": "email"
+                "format": "email",
+                "description": "Customer email \u2014 creates or finds a customer"
               },
-              "returnUrl": {
+              "customer": {
                 "type": "string",
-                "format": "uri"
+                "description": "Customer prefix ID (alternative to email)"
               },
-              "cancelUrl": {
-                "type": "string",
-                "format": "uri"
-              },
-              "discountCode": { "type": "string" },
-              "checkoutItemsAttributes": {
+              "line_items": {
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": ["price_variant_id"],
+                  "required": [
+                    "price_variant"
+                  ],
                   "properties": {
-                    "priceVariantId": { "type": "integer" },
+                    "price_variant": {
+                      "type": "string",
+                      "description": "Price variant prefix ID"
+                    },
                     "quantity": {
                       "type": "integer",
-                      "minimum": 1
-                    },
-                    "customAmount": {
-                      "type": "integer",
-                      "description": "Custom amount in cents (pay-what-you-want)"
+                      "minimum": 1,
+                      "default": 1
                     }
                   }
                 }
@@ -1606,7 +3159,9 @@
       },
       "CheckoutUpdateRequest": {
         "type": "object",
-        "required": ["checkout"],
+        "required": [
+          "checkout"
+        ],
         "properties": {
           "checkout": {
             "type": "object",
@@ -1615,57 +3170,28 @@
                 "type": "string",
                 "format": "email"
               },
-              "discountCode": { "type": "string" }
+              "discount_code": {
+                "type": "string"
+              }
             }
-          }
-        }
-      },
-      "CartItem": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "quantity": { "type": "integer" },
-          "priceVariant": {
-            "$ref": "#/components/schemas/PriceVariant"
-          },
-          "product": {
-            "$ref": "#/components/schemas/ProductSlim"
-          }
-        }
-      },
-      "Cart": {
-        "type": "object",
-        "properties": {
-          "prefixId": { "type": "string" },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "total": {
-            "type": "integer",
-            "description": "Total in cents"
-          },
-          "isFree": { "type": "boolean" },
-          "cartItems": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CartItem"
-            }
-          },
-          "sellerAccount": {
-            "$ref": "#/components/schemas/Account"
           }
         }
       },
       "CartCreateRequest": {
         "type": "object",
+        "required": [
+          "cart"
+        ],
         "properties": {
           "cart": {
             "type": "object",
+            "required": [
+              "customer"
+            ],
             "properties": {
-              "customerId": {
-                "type": "integer",
-                "description": "Associate cart with an existing customer"
+              "customer": {
+                "type": "string",
+                "description": "Customer prefix ID"
               }
             }
           }
@@ -1673,27 +3199,30 @@
       },
       "CartUpdateRequest": {
         "type": "object",
-        "required": ["cart"],
+        "required": [
+          "cart"
+        ],
         "properties": {
           "cart": {
             "type": "object",
             "properties": {
-              "customerId": { "type": "integer" },
-              "cartItemsAttributes": {
+              "cart_items_attributes": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "type": "integer",
-                      "description": "Existing item ID (for update/delete)"
+                    "price_variant": {
+                      "type": "string",
+                      "description": "Price variant prefix ID"
                     },
-                    "priceVariantId": { "type": "integer" },
                     "quantity": {
                       "type": "integer",
                       "minimum": 1
                     },
-                    "customAmount": { "type": "integer" },
+                    "custom_amount": {
+                      "type": "integer",
+                      "description": "Custom amount in cents (pay-what-you-want)"
+                    },
                     "_destroy": {
                       "type": "boolean",
                       "description": "Set to true to remove item"
@@ -1705,633 +3234,197 @@
           }
         }
       },
-      "OrderLineItem": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "quantity": { "type": "integer" },
-          "priceVariant": {
-            "$ref": "#/components/schemas/PriceVariant"
-          },
-          "product": {
-            "$ref": "#/components/schemas/Product"
-          }
-        }
-      },
-      "Order": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "status": {
-            "type": "string",
-            "enum": ["succeeded", "pending", "failed", "refunded", "partially_refunded"]
-          },
-          "prefixId": { "type": "string" },
-          "amount": {
-            "type": "integer",
-            "description": "Order total in cents"
-          },
-          "currency": { "type": "string" },
-          "isFree": { "type": "boolean" },
-          "isPaid": { "type": "boolean" },
-          "isSeatOrder": { "type": "boolean" },
-          "hasSubscription": { "type": "boolean" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lineItems": {
-            "type": "array",
-            "description": "Included when expand=line_items",
-            "items": {
-              "$ref": "#/components/schemas/OrderLineItem"
-            }
-          },
-          "customer": {
-            "description": "Included when expand=customer",
-            "$ref": "#/components/schemas/Customer"
-          },
-          "discount": {
-            "description": "Included when expand=discount",
-            "$ref": "#/components/schemas/Discount"
-          },
-          "charge": {
-            "description": "Included when expand=charge. Contains Stripe charge details.",
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "id": { "type": "string" },
-              "amount": {
-                "type": "integer",
-                "description": "Charge amount in cents"
-              },
-              "currency": { "type": "string" },
-              "status": { "type": "string" },
-              "receiptUrl": {
-                "type": "string",
-                "format": "uri",
-                "nullable": true
-              }
-            }
-          },
-          "sellerAccount": {
-            "description": "Included when expand=seller_account",
-            "$ref": "#/components/schemas/Account"
-          }
-        }
-      },
-      "PaginatedOrders": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Order"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
-          }
-        }
-      },
-      "Customer": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "name": { "type": "string" },
-          "firstName": { "type": "string" },
-          "lastName": {
-            "type": "string",
-            "nullable": true
-          },
-          "customerType": {
-            "type": "string",
-            "enum": ["lead", "free", "paid"]
-          },
-          "prefixId": { "type": "string" },
-          "ordersCount": { "type": "integer" },
-          "totalSpend": {
-            "type": "integer",
-            "description": "Total spend in cents"
-          },
-          "tags": {
-            "type": "array",
-            "description": "Tags associated with the customer",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": { "type": "integer" },
-                "name": { "type": "string" }
-              }
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PaginatedCustomers": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Customer"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
-          }
-        }
-      },
       "CustomerRequest": {
         "type": "object",
-        "required": ["customer"],
+        "required": [
+          "customer"
+        ],
         "properties": {
           "customer": {
             "type": "object",
-            "required": ["email"],
+            "required": [
+              "email"
+            ],
             "properties": {
               "email": {
                 "type": "string",
                 "format": "email"
               },
-              "name": { "type": "string" },
-              "firstName": { "type": "string" },
-              "lastName": { "type": "string" },
-              "customerType": {
+              "name": {
+                "type": "string"
+              },
+              "first_name": {
+                "type": "string"
+              },
+              "last_name": {
+                "type": "string"
+              },
+              "customer_type": {
                 "type": "string",
-                "enum": ["lead", "free", "paid"]
+                "enum": [
+                  "lead",
+                  "free",
+                  "paid"
+                ]
               }
             }
-          }
-        }
-      },
-      "Discount": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "status": {
-            "type": "string",
-            "enum": ["active", "expired", "scheduled"]
-          },
-          "discountType": {
-            "type": "string",
-            "enum": ["amount_off", "percent_off"]
-          },
-          "code": { "type": "string" },
-          "redeemBy": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "maxRedemptions": {
-            "type": "integer",
-            "nullable": true
-          },
-          "timesRedeemed": { "type": "integer" },
-          "duration": {
-            "type": "string",
-            "enum": ["once", "forever", "repeating"],
-            "nullable": true
-          },
-          "durationInMonths": {
-            "type": "integer",
-            "nullable": true
-          },
-          "amountOff": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Discount amount in cents"
-          },
-          "percentOff": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "prefixId": { "type": "string" },
-          "destroyable": { "type": "boolean" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "priceVariants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PriceVariant"
-            }
-          }
-        }
-      },
-      "PaginatedDiscounts": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Discount"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
           }
         }
       },
       "DiscountRequest": {
         "type": "object",
-        "required": ["discount"],
+        "required": [
+          "discount"
+        ],
         "properties": {
           "discount": {
             "type": "object",
-            "required": ["code", "discount_type"],
+            "required": [
+              "code",
+              "discount_type"
+            ],
             "properties": {
-              "code": { "type": "string" },
-              "discountType": {
-                "type": "string",
-                "enum": ["amount_off", "percent_off"]
+              "code": {
+                "type": "string"
               },
-              "amountOff": {
+              "discount_type": {
+                "type": "string",
+                "enum": [
+                  "amount_off",
+                  "percent_off"
+                ]
+              },
+              "amount_off": {
                 "type": "integer",
                 "description": "Discount amount in cents (required if discount_type=amount_off)"
               },
-              "percentOff": {
+              "percent_off": {
                 "type": "number",
                 "description": "Discount percentage 0-100 (required if discount_type=percent_off)"
               },
-              "currency": { "type": "string" },
+              "currency": {
+                "type": "string"
+              },
               "duration": {
                 "type": "string",
-                "enum": ["once", "forever", "repeating"]
+                "enum": [
+                  "once",
+                  "forever",
+                  "repeating"
+                ]
               },
-              "durationInMonths": { "type": "integer" },
-              "redeemBy": {
+              "duration_in_months": {
+                "type": "integer"
+              },
+              "redeem_by": {
                 "type": "string",
                 "format": "date-time"
               },
-              "maxRedemptions": { "type": "integer" },
-              "priceVariants": {
+              "max_redemptions": {
+                "type": "integer"
+              },
+              "price_variants": {
                 "type": "array",
-                "description": "Limit discount to specific price variant IDs",
-                "items": { "type": "integer" }
+                "description": "Limit discount to specific price variant prefix IDs",
+                "items": {
+                  "type": "string"
+                }
               }
             }
-          }
-        }
-      },
-      "CheckoutLink": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "successUrl": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
-          },
-          "allowDiscountCodes": { "type": "boolean" },
-          "prefixId": { "type": "string" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "discount": {
-            "$ref": "#/components/schemas/Discount"
-          },
-          "priceVariants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PriceVariant"
-            }
-          },
-          "products": {
-            "type": "array",
-            "description": "Products associated with this checkout link",
-            "items": {
-              "$ref": "#/components/schemas/ProductSlim"
-            }
-          },
-          "qrCode": {
-            "nullable": true,
-            "description": "QR code image for the checkout link",
-            "allOf": [{ "$ref": "#/components/schemas/FileAttachment" }]
-          }
-        }
-      },
-      "PaginatedCheckoutLinks": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CheckoutLink"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
           }
         }
       },
       "CheckoutLinkRequest": {
         "type": "object",
-        "required": ["checkout_link"],
+        "required": [
+          "checkout_link"
+        ],
         "properties": {
-          "checkoutLink": {
+          "checkout_link": {
             "type": "object",
-            "required": ["price_variant_ids"],
+            "required": [
+              "price_variants"
+            ],
             "properties": {
-              "name": { "type": "string" },
-              "discountId": {
-                "type": "integer",
-                "nullable": true
+              "name": {
+                "type": "string"
               },
-              "allowDiscountCodes": { "type": "boolean" },
-              "successUrl": {
+              "discount": {
+                "type": "string",
+                "nullable": true,
+                "description": "Discount prefix ID"
+              },
+              "allow_discount_codes": {
+                "type": "boolean"
+              },
+              "success_url": {
                 "type": "string",
                 "format": "uri"
               },
-              "priceVariantIds": {
+              "price_variants": {
                 "type": "array",
-                "items": { "type": "integer" }
+                "description": "Price variant prefix IDs",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
         }
       },
-      "Experience": {
+      "WebhookEndpointRequest": {
         "type": "object",
+        "required": [
+          "webhook_endpoint"
+        ],
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "slug": { "type": "string" },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "accessType": { "type": "string" },
-          "itemType": { "type": "string" },
-          "prefixId": { "type": "string" },
-          "typeForDisplay": { "type": "string" },
-          "image": {
-            "nullable": true,
-            "allOf": [{ "$ref": "#/components/schemas/ImageAttachment" }]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PaginatedExperiences": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Experience"
+          "webhook_endpoint": {
+            "type": "object",
+            "required": [
+              "url",
+              "enabled_events"
+            ],
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "disabled"
+                ]
+              },
+              "enabled_events": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
             }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
           }
         }
       },
-      "BlogCategory": {
+      "X402ConfigurationRequest": {
         "type": "object",
+        "required": [
+          "x402_configuration"
+        ],
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "slug": { "type": "string" },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "blogPostsCount": { "type": "integer" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "BlogPost": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "title": { "type": "string" },
-          "slug": { "type": "string" },
-          "content": { "type": "string" },
-          "status": {
-            "type": "string",
-            "enum": ["draft", "published", "scheduled"]
-          },
-          "indexable": { "type": "boolean" },
-          "excerpt": { "type": "string" },
-          "url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "publishedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "scheduledAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "prefixId": { "type": "string" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "category": {
-            "$ref": "#/components/schemas/BlogCategory"
-          },
-          "seo": {
-            "$ref": "#/components/schemas/Seo"
-          },
-          "featuredImage": {
-            "nullable": true,
-            "description": "Featured image for the blog post",
-            "allOf": [{ "$ref": "#/components/schemas/MediaItem" }]
-          },
-          "socialMediaImage": {
-            "nullable": true,
-            "description": "Social media sharing image for the blog post",
-            "allOf": [{ "$ref": "#/components/schemas/MediaItem" }]
-          }
-        }
-      },
-      "PaginatedBlogPosts": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BlogPost"
+          "x402_configuration": {
+            "type": "object",
+            "properties": {
+              "x402_enabled": {
+                "type": "boolean"
+              },
+              "x402_wallet_address": {
+                "type": "string"
+              },
+              "x402_chain": {
+                "type": "string"
+              }
             }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
-          }
-        }
-      },
-      "ImageAttachment": {
-        "type": "object",
-        "properties": {
-          "filename": { "type": "string" },
-          "contentType": { "type": "string" },
-          "byteSize": { "type": "integer" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "signedId": { "type": "string" },
-          "src": {
-            "type": "string",
-            "format": "uri"
-          },
-          "srcSet": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "MediaItem": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "sourceType": { "type": "string" },
-          "url": {
-            "type": "string",
-            "nullable": true
-          },
-          "provider": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "file": {
-            "nullable": true,
-            "allOf": [{ "$ref": "#/components/schemas/ImageAttachment" }]
-          },
-          "contentType": { "type": "string" },
-          "embedHtml": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "FileAttachment": {
-        "type": "object",
-        "properties": {
-          "filename": { "type": "string" },
-          "contentType": { "type": "string" },
-          "byteSize": { "type": "integer" },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "signedId": { "type": "string" },
-          "src": {
-            "type": "string",
-            "format": "uri"
-          },
-          "srcSet": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "SocialLink": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "platform": { "type": "string" },
-          "position": {
-            "type": "integer",
-            "description": "Display order position"
-          },
-          "active": {
-            "type": "boolean",
-            "description": "Whether this social link is active"
-          }
-        }
-      },
-      "LinkInBioPage": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "title": { "type": "string" },
-          "description": { "type": "string" }
-        }
-      },
-      "Seo": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "keywords": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -2343,22 +3436,32 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "Error type identifier"
+                "description": "Error type (e.g., invalid_request_error, validation_error, api_error)"
+              },
+              "code": {
+                "type": "string",
+                "description": "Error code (e.g., resource_missing, authentication_required)"
               },
               "message": {
-                "type": "string",
-                "description": "Human-readable error message"
+                "type": "string"
               },
-              "details": {
+              "param": {
+                "type": "string",
+                "nullable": true
+              },
+              "errors": {
                 "type": "object",
-                "nullable": true,
-                "description": "Additional error details"
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": "Field-level validation errors"
               }
-            },
-            "required": ["type", "message"]
+            }
           }
-        },
-        "required": ["error"]
+        }
       }
     },
     "responses": {
@@ -2371,8 +3474,9 @@
             },
             "example": {
               "error": {
-                "type": "unauthorized",
-                "message": "Unauthorized"
+                "type": "invalid_request_error",
+                "code": "authentication_required",
+                "message": "You did not provide an API key."
               }
             }
           }
@@ -2387,8 +3491,9 @@
             },
             "example": {
               "error": {
-                "type": "not_found",
-                "message": "Not found"
+                "type": "invalid_request_error",
+                "code": "resource_missing",
+                "message": "The requested resource was not found"
               }
             }
           }
@@ -2404,9 +3509,12 @@
             "example": {
               "error": {
                 "type": "validation_error",
-                "message": "Validation failed",
-                "details": {
-                  "email": ["is required"]
+                "code": "validation_failed",
+                "message": "Email is required",
+                "errors": {
+                  "email": [
+                    "can't be blank"
+                  ]
                 }
               }
             }
@@ -2416,20 +3524,66 @@
     }
   },
   "security": [
-    { "ApiKeyAuth": [] }
+    {
+      "ApiKeyAuth": []
+    }
   ],
   "tags": [
-    { "name": "Account", "description": "Current account information" },
-    { "name": "Products", "description": "Digital product catalog" },
-    { "name": "PriceVariants", "description": "Product pricing tiers" },
-    { "name": "Reviews", "description": "Product reviews" },
-    { "name": "Checkouts", "description": "Checkout session management" },
-    { "name": "Carts", "description": "Shopping cart management" },
-    { "name": "Orders", "description": "Order history and details" },
-    { "name": "Customers", "description": "Customer relationship management" },
-    { "name": "Discounts", "description": "Discount code management" },
-    { "name": "CheckoutLinks", "description": "Shareable checkout links" },
-    { "name": "Experiences", "description": "Digital experiences (courses, communities, downloads)" },
-    { "name": "BlogPosts", "description": "Blog content management" }
+    {
+      "name": "Account",
+      "description": "Current account information"
+    },
+    {
+      "name": "Products",
+      "description": "Digital product catalog"
+    },
+    {
+      "name": "PriceVariants",
+      "description": "Product pricing tiers"
+    },
+    {
+      "name": "Reviews",
+      "description": "Product reviews"
+    },
+    {
+      "name": "Checkouts",
+      "description": "Checkout session management"
+    },
+    {
+      "name": "Carts",
+      "description": "Shopping cart management"
+    },
+    {
+      "name": "Orders",
+      "description": "Order history and details"
+    },
+    {
+      "name": "Customers",
+      "description": "Customer relationship management"
+    },
+    {
+      "name": "Discounts",
+      "description": "Discount code management"
+    },
+    {
+      "name": "CheckoutLinks",
+      "description": "Shareable checkout links"
+    },
+    {
+      "name": "Experiences",
+      "description": "Digital experiences (courses, communities, downloads)"
+    },
+    {
+      "name": "BlogPosts",
+      "description": "Blog content management"
+    },
+    {
+      "name": "WebhookEndpoints",
+      "description": "Webhook endpoint management"
+    },
+    {
+      "name": "X402Configuration",
+      "description": "x402 payment protocol configuration"
+    }
   ]
 }

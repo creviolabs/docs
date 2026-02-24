@@ -7,14 +7,17 @@ The Crevio API lets you programmatically manage your account's products, orders,
 
 ## What you can do with the API
 
-- **Products** -- Create, update, list, and retrieve products and price variants.
-- **Orders** -- List and retrieve order details.
-- **Customers** -- List, retrieve, and manage customer records.
-- **Checkouts** -- Create checkout sessions and retrieve checkout details.
-- **Checkout links** -- Create and manage shareable checkout links.
-- **Experiences** -- List and retrieve experiences and their content.
-- **Discounts** -- Create and manage discount codes.
-- **Blog posts** -- Create and manage blog content.
+- **Products** — List and retrieve products and price variants.
+- **Orders** — List and retrieve order details with expandable line items and customers.
+- **Customers** — List, create, update, and retrieve customer records.
+- **Checkouts** — Create checkout sessions and retrieve checkout details.
+- **Carts** — Create and manage shopping carts.
+- **Checkout links** — Create and manage shareable checkout links.
+- **Experiences** — List and retrieve experiences and their content.
+- **Discounts** — Create, update, and manage discount codes.
+- **Blog posts** — List and retrieve published blog content.
+- **Webhook endpoints** — Create, update, and manage webhook subscriptions.
+- **x402 Configuration** — Configure x402 crypto payment settings.
 
 ## Authentication
 
@@ -69,51 +72,124 @@ The API enforces rate limits to ensure fair usage and platform stability. If you
   Implement exponential backoff in your API client to handle rate limits gracefully. The `@crevio/sdk` handles this automatically.
 </Tip>
 
-## Pagination
+## Conventions
 
-List endpoints return paginated results. The response includes an `items` array and a `pagination` object:
+### snake_case keys
+
+All API responses use snake_case keys, following Stripe conventions:
 
 ```json
 {
-  "items": [
-    { "id": "prod_abc123", "name": "My Course" },
-    { "id": "prod_def456", "name": "Templates Pack" }
+  "id": "prod_abc123",
+  "object": "product",
+  "name": "My Course",
+  "created_at": "2025-01-15T10:30:00Z",
+  "price_variants": [...]
+}
+```
+
+### Prefix IDs
+
+All resource IDs are string prefix IDs that encode the resource type:
+
+| Resource | Prefix | Example |
+|----------|--------|---------|
+| Account | `acct_` | `acct_abc123` |
+| Product | `prod_` | `prod_abc123` |
+| Price Variant | `pv_` | `pv_abc123` |
+| Order | `ord_` | `ord_abc123` |
+| Customer | `cust_` | `cust_abc123` |
+| Checkout | `co_` | `co_abc123` |
+| Discount | `disc_` | `disc_abc123` |
+
+### Object type discriminator
+
+Every resource includes an `object` field identifying its type:
+
+```json
+{
+  "id": "cust_abc123",
+  "object": "customer",
+  "email": "jane@example.com"
+}
+```
+
+## List responses
+
+List endpoints return a Stripe-style envelope with cursor-based pagination:
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "prod_abc123", "object": "product", "name": "My Course" },
+    { "id": "prod_def456", "object": "product", "name": "Templates Pack" }
   ],
-  "pagination": {
-    "page": 1,
-    "pages": 5,
-    "count": 47,
-    "limit": 10,
-    "offset": 0,
-    "from": 1,
-    "to": 10,
-    "in": 10,
-    "last": 5,
-    "next": 2,
-    "previous": null
+  "has_more": true,
+  "url": "/v1/products"
+}
+```
+
+### Pagination parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Number of items per page (1–100, default 20) |
+| `starting_after` | Cursor — the `id` of the last item from the previous page |
+
+To fetch the next page, pass the last item's `id` as `starting_after`:
+
+```bash
+# First page
+curl "https://api.crevio.co/v1/products?limit=10" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+
+# Next page
+curl "https://api.crevio.co/v1/products?limit=10&starting_after=prod_def456" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+When `has_more` is `false`, you've reached the last page.
+
+## Expandable fields
+
+Many endpoints support an `expand` query parameter to include related resources inline. Without expansion, related resources appear as collapsed prefix IDs:
+
+```json
+{
+  "id": "ord_abc123",
+  "object": "order",
+  "customer": "cust_xyz789"
+}
+```
+
+With `?expand=customer`:
+
+```json
+{
+  "id": "ord_abc123",
+  "object": "order",
+  "customer": {
+    "id": "cust_xyz789",
+    "object": "customer",
+    "email": "jane@example.com",
+    "name": "Jane Doe"
   }
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `page` | Current page number |
-| `pages` | Total number of pages |
-| `count` | Total number of items across all pages |
-| `limit` | Number of items per page |
-| `offset` | Number of items skipped |
-| `from` | Position of the first item on this page |
-| `to` | Position of the last item on this page |
-| `in` | Number of items on this page |
-| `last` | Last page number |
-| `next` | Next page number, or `null` if on the last page |
-| `previous` | Previous page number, or `null` if on the first page |
+Available expand fields vary by endpoint. See the API reference for details.
 
-Use the `page` query parameter to navigate between pages:
+## Delete responses
 
-```bash
-curl https://api.crevio.co/v1/products?page=2 \
-  -H "Authorization: Bearer YOUR_API_TOKEN"
+Delete endpoints return a Stripe-style confirmation:
+
+```json
+{
+  "id": "disc_abc123",
+  "object": "discount",
+  "deleted": true
+}
 ```
 
 ## Error format
@@ -124,9 +200,10 @@ When a request fails, the API returns a JSON error response:
 {
   "error": {
     "type": "validation_error",
-    "message": "Name can't be blank",
-    "details": {
-      "name": ["can't be blank"]
+    "code": "validation_failed",
+    "message": "Email can't be blank",
+    "errors": {
+      "email": ["can't be blank"]
     }
   }
 }
@@ -134,18 +211,19 @@ When a request fails, the API returns a JSON error response:
 
 | Field | Description |
 |-------|-------------|
-| `type` | The error category (e.g., `validation_error`, `not_found`, `parameter_missing`, `error`) |
+| `type` | Error category (e.g., `invalid_request_error`, `validation_error`, `api_error`) |
+| `code` | Machine-readable code (e.g., `resource_missing`, `authentication_required`, `validation_failed`) |
 | `message` | A human-readable description of what went wrong |
-| `details` | Field-level validation errors (included for validation errors only) |
+| `param` | The parameter that caused the error (included for parameter errors) |
+| `errors` | Field-level validation errors (included for validation errors) |
 
 ### Common error types
 
 | Type | HTTP status | Description |
 |------|-------------|-------------|
+| `invalid_request_error` | `400`, `401`, `404` | The request is invalid (missing params, bad auth, not found) |
 | `validation_error` | `422` | The request body contains invalid data |
-| `not_found` | `404` | The requested resource does not exist |
-| `parameter_missing` | `400` | A required parameter is missing |
-| `error` | `500` | An unexpected server error occurred |
+| `api_error` | `500` | An unexpected server error occurred |
 
 ## Full API reference
 
@@ -183,18 +261,23 @@ Basic usage:
 import { Crevio } from "@crevio/sdk";
 
 const crevio = new Crevio({
-  bearerAuth: "YOUR_API_TOKEN",
+  apiKeyAuth: "YOUR_API_TOKEN",
 });
 
 // List products
-const { items, pagination } = await crevio.products.list();
+const products = await crevio.products.list();
 
 // Get a specific product
-const product = await crevio.products.get("prod_abc123");
+const product = await crevio.products.get({ prefixId: "prod_abc123" });
 
 // Create a checkout
 const checkout = await crevio.checkouts.create({
-  priceVariantId: "pv_xyz789",
+  checkout: {
+    email: "customer@example.com",
+    line_items: [
+      { price_variant: "pv_xyz789", quantity: 1 },
+    ],
+  },
 });
 ```
 

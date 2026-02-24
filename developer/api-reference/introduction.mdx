@@ -3,7 +3,7 @@ title: "API reference"
 description: "Programmatically manage your Crevio storefront"
 ---
 
-The Crevio API lets you manage products, pricing, checkouts, orders, customers, and more. All endpoints return JSON and use standard HTTP methods.
+The Crevio API lets you manage products, pricing, checkouts, orders, customers, and more. All endpoints return JSON with snake_case keys following Stripe conventions.
 
 ## Base URL
 
@@ -32,37 +32,83 @@ Generate API tokens from **Settings > Developer > API tokens** in your dashboard
   Keep your API tokens secure. Do not expose them in client-side code or public repositories.
 </Warning>
 
-## Pagination
+## Object types
 
-List endpoints return paginated results with this structure:
+Every API resource includes an `object` field that identifies the resource type:
 
 ```json
 {
-  "items": [...],
-  "pagination": {
-    "count": 50,
-    "page": 1,
-    "pages": 5,
-    "limit": 20,
-    "offset": 0,
-    "from": 1,
-    "to": 20,
-    "in": 20,
-    "last": 5,
-    "next": 2,
-    "previous": null
+  "id": "prod_abc123",
+  "object": "product",
+  "name": "My Course",
+  "slug": "my-course"
+}
+```
+
+All IDs are string prefix IDs (e.g., `prod_abc123`, `pv_def456`, `cust_ghi789`).
+
+## List responses
+
+List endpoints return a Stripe-style envelope:
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "prod_abc123", "object": "product", "name": "My Course" },
+    { "id": "prod_def456", "object": "product", "name": "Templates Pack" }
+  ],
+  "has_more": true,
+  "url": "/v1/products"
+}
+```
+
+Use `starting_after` and `limit` query parameters to paginate. Pass the `id` of the last item to fetch the next page:
+
+```bash
+curl "https://api.crevio.co/v1/products?starting_after=prod_abc123&limit=20" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+Default limit is 20, maximum is 100.
+
+## Expandable fields
+
+Some endpoints support an `expand` query parameter to include related data inline. Pass a comma-separated list of fields:
+
+```bash
+curl "https://api.crevio.co/v1/orders?expand=line_items,customer"
+```
+
+Without expand, related resources appear as collapsed prefix IDs:
+
+```json
+{ "customer": "cust_abc123" }
+```
+
+With expand, they become full objects:
+
+```json
+{
+  "customer": {
+    "id": "cust_abc123",
+    "object": "customer",
+    "email": "jane@example.com",
+    "name": "Jane Doe"
   }
 }
 ```
 
-Use `page` and `limit` query parameters to navigate results. Default limit is 20, maximum is 100.
+## Delete responses
 
-## Expandable fields
+Delete endpoints return a Stripe-style confirmation:
 
-Some endpoints support an `expand` query parameter to include related data. Pass a comma-separated list of fields:
-
-```bash
-curl "https://api.crevio.co/v1/orders?expand=line_items,customer,discount"
+```json
+{
+  "id": "disc_abc123",
+  "object": "discount",
+  "deleted": true
+}
 ```
 
 ## Errors
@@ -73,21 +119,22 @@ All errors follow this format:
 {
   "error": {
     "type": "validation_error",
-    "message": "Validation failed",
-    "details": {
-      "email": ["is required"]
+    "code": "validation_failed",
+    "message": "Email can't be blank",
+    "errors": {
+      "email": ["can't be blank"]
     }
   }
 }
 ```
 
-| Status | Type | Description |
-|--------|------|-------------|
-| 400 | `parameter_missing` | A required parameter is missing |
-| 401 | `unauthorized` | Invalid or missing API token |
-| 404 | `not_found` | Resource not found |
-| 422 | `validation_error` | Request failed validation |
-| 500 | `error` | Internal server error |
+| Status | Type | Code | Description |
+|--------|------|------|-------------|
+| 400 | `invalid_request_error` | `parameter_missing` | A required parameter is missing |
+| 401 | `invalid_request_error` | `authentication_required` | Invalid or missing API token |
+| 404 | `invalid_request_error` | `resource_missing` | Resource not found |
+| 422 | `validation_error` | `validation_failed` | Request failed validation |
+| 500 | `api_error` | — | Internal server error |
 
 ## SDKs
 
@@ -103,9 +150,7 @@ npm install @crevio/sdk
 import { Crevio } from "@crevio/sdk";
 
 const crevio = new Crevio({
-  security: {
-    apiKey: "YOUR_API_TOKEN",
-  },
+  apiKeyAuth: "YOUR_API_TOKEN",
 });
 
 const products = await crevio.products.list();

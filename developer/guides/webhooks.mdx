@@ -16,6 +16,10 @@ A webhook is an HTTP POST request that Crevio sends to a URL you specify wheneve
 
 ## Creating webhook endpoints
 
+You can create webhook endpoints from the dashboard or via the API.
+
+### Via Dashboard
+
 <Steps>
   <Step title="Go to Developer settings">
     In your dashboard, navigate to **Settings** > **Developer**.
@@ -30,6 +34,43 @@ A webhook is an HTTP POST request that Crevio sends to a URL you specify wheneve
     Save the endpoint. Crevio generates a unique **signing secret** (prefixed with `whsec_`) that you will use to verify incoming requests.
   </Step>
 </Steps>
+
+### Via API
+
+```bash
+curl -X POST https://api.crevio.co/v1/webhook_endpoints \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "webhook_endpoint": {
+      "url": "https://example.com/webhooks/crevio",
+      "enabled_events": ["order.paid", "checkout.created"]
+    }
+  }'
+```
+
+The response includes a `secret` field — this is only returned on creation:
+
+```json
+{
+  "id": "we_abc123",
+  "object": "webhook_endpoint",
+  "url": "https://example.com/webhooks/crevio",
+  "api_version": "v1",
+  "status": "active",
+  "enabled_events": ["order.paid", "checkout.created"],
+  "secret": "whsec_...",
+  "created_at": "2025-01-15T10:30:00Z",
+  "updated_at": "2025-01-15T10:30:00Z"
+}
+```
+
+You can also list available event types:
+
+```bash
+curl https://api.crevio.co/v1/webhook_endpoints/events \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
 
 <Warning>
   Copy your signing secret immediately after creation. You will need it to verify webhook signatures. The secret is shown once and cannot be retrieved later.
