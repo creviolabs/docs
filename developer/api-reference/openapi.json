@@ -3,7 +3,7 @@
   "info": {
     "title": "Crevio API",
     "description": "API for the Crevio creator platform \u2014 a multi-tenant SaaS for digital product sales.\nUses snake_case keys following Stripe conventions. All resource IDs are string prefix IDs (e.g., \"prod_abc123\").\n",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "contact": {
       "name": "Crevio Support",
       "url": "https://crevio.co"
@@ -58,7 +58,7 @@
     "/products": {
       "get": {
         "summary": "List products",
-        "description": "Returns a list of published products for the current account",
+        "description": "Returns a list of products for the current account. Supports filtering by status and searching by name.",
         "operationId": "listProducts",
         "x-speakeasy-name-override": "list",
         "tags": [
@@ -70,6 +70,19 @@
           }
         ],
         "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by product status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "active",
+                "archived"
+              ]
+            }
+          },
           {
             "name": "query",
             "in": "query",
@@ -108,6 +121,48 @@
             "$ref": "#/components/responses/Unauthorized"
           }
         }
+      },
+      "post": {
+        "summary": "Create product",
+        "description": "Creates a new product",
+        "operationId": "createProduct",
+        "x-speakeasy-name-override": "create",
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
       }
     },
     "/products/{prefix_id}": {
@@ -144,6 +199,93 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update product",
+        "description": "Updates an existing product",
+        "operationId": "updateProduct",
+        "x-speakeasy-name-override": "update",
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete product",
+        "description": "Deletes a product. Only products with no orders and no Stripe product ID can be deleted.",
+        "operationId": "deleteProduct",
+        "x-speakeasy-name-override": "delete",
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
                 }
               }
             }
@@ -210,7 +352,7 @@
     "/price_variants": {
       "get": {
         "summary": "List price variants",
-        "description": "Returns all price variants for the current account",
+        "description": "Returns all price variants for the current account. Optionally filter by product.",
         "operationId": "listPriceVariants",
         "x-speakeasy-name-override": "list",
         "tags": [
@@ -222,6 +364,14 @@
           }
         ],
         "parameters": [
+          {
+            "name": "product",
+            "in": "query",
+            "description": "Filter by product prefix ID",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "$ref": "#/components/parameters/StartingAfter"
           },
@@ -242,6 +392,48 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create price variant",
+        "description": "Creates a new price variant for a product",
+        "operationId": "createPriceVariant",
+        "x-speakeasy-name-override": "create",
+        "tags": [
+          "PriceVariants"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceVariantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Price variant created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceVariant"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           }
         }
       }
@@ -281,6 +473,56 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update price variant",
+        "description": "Updates an existing price variant. Set archived to true to archive it.",
+        "operationId": "updatePriceVariant",
+        "x-speakeasy-name-override": "update",
+        "tags": [
+          "PriceVariants"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceVariantUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Price variant updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceVariant"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           }
         }
       }
@@ -1939,6 +2181,494 @@
         }
       }
     },
+    "/invoices": {
+      "get": {
+        "summary": "List invoices",
+        "description": "Returns a list of invoices for the current account",
+        "operationId": "listInvoices",
+        "x-speakeasy-name-override": "list",
+        "tags": [
+          "Invoices"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by invoice status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "PAID",
+                "PAST_DUE",
+                "VOID"
+              ]
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "description": "Filter by customer prefix ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: customer, price_variant, order",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of invoices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_Invoice"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create invoice",
+        "description": "Creates a new invoice and sends it to the customer via email",
+        "operationId": "createInvoice",
+        "x-speakeasy-name-override": "create",
+        "tags": [
+          "Invoices"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invoice created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/invoices/{prefix_id}": {
+      "get": {
+        "summary": "Get invoice",
+        "description": "Returns a specific invoice",
+        "operationId": "getInvoice",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "Invoices"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: customer, price_variant, order",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/invoices/{prefix_id}/void": {
+      "post": {
+        "summary": "Void invoice",
+        "description": "Voids an open invoice. Cannot void paid invoices.",
+        "operationId": "voidInvoice",
+        "x-speakeasy-name-override": "void",
+        "tags": [
+          "Invoices"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice voided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "400": {
+            "description": "Invoice cannot be voided (already void or paid)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/invoices/{prefix_id}/pay": {
+      "post": {
+        "summary": "Pay invoice",
+        "description": "Creates a checkout session for the invoice and returns the checkout with a Stripe client secret for completing payment",
+        "operationId": "payInvoice",
+        "x-speakeasy-name-override": "pay",
+        "tags": [
+          "Invoices"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Checkout session created for invoice payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Checkout"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "description": "Invoice is not payable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/subscriptions": {
+      "get": {
+        "summary": "List subscriptions",
+        "description": "Returns a list of customer subscriptions for the current account",
+        "operationId": "listSubscriptions",
+        "x-speakeasy-name-override": "list",
+        "tags": [
+          "Subscriptions"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by subscription status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "canceled",
+                "paused",
+                "past_due",
+                "unpaid",
+                "incomplete",
+                "trialing"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_Subscription"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/subscriptions/{prefix_id}": {
+      "get": {
+        "summary": "Get subscription",
+        "description": "Returns a specific subscription",
+        "operationId": "getSubscription",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "Subscriptions"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/subscriptions/{prefix_id}/cancel": {
+      "post": {
+        "summary": "Cancel subscription",
+        "description": "Cancels a subscription. Metered and past-due subscriptions are canceled immediately. Others cancel at the end of the current billing period.",
+        "operationId": "cancelSubscription",
+        "x-speakeasy-name-override": "cancel",
+        "tags": [
+          "Subscriptions"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription canceled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/subscriptions/{prefix_id}/pause": {
+      "post": {
+        "summary": "Pause subscription",
+        "description": "Pauses a subscription",
+        "operationId": "pauseSubscription",
+        "x-speakeasy-name-override": "pause",
+        "tags": [
+          "Subscriptions"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription paused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "400": {
+            "description": "Subscription cannot be paused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/subscriptions/{prefix_id}/resume": {
+      "post": {
+        "summary": "Resume subscription",
+        "description": "Resumes a paused or canceled subscription",
+        "operationId": "resumeSubscription",
+        "x-speakeasy-name-override": "resume",
+        "tags": [
+          "Subscriptions"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription resumed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "400": {
+            "description": "Subscription cannot be resumed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/x402_configuration": {
       "get": {
         "summary": "Get x402 configuration",
@@ -2135,6 +2865,52 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Order"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Subscription": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListResponse_Invoice": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Invoice"
             }
           },
           "has_more": {
@@ -2691,6 +3467,161 @@
           "checkout": {
             "type": "string",
             "description": "Checkout prefix ID"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (sub_*)"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "subscription"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Stripe subscription status"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "current_period_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "current_period_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "trial_ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Set when subscription is canceled (cancellation effective date)"
+          },
+          "canceled": {
+            "type": "boolean"
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (inv_*)"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "invoice"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "PAID",
+              "PAST_DUE",
+              "VOID"
+            ]
+          },
+          "number": {
+            "type": "string",
+            "description": "Auto-generated invoice number (e.g., #00000001)"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "customer_name": {
+            "type": "string"
+          },
+          "email_address": {
+            "type": "string",
+            "format": "email"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Invoice amount in cents"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "customer": {
+            "description": "Customer prefix ID by default. When expand=customer, returns a full Customer object.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Customer"
+              }
+            ],
+            "nullable": true
+          },
+          "price_variant": {
+            "description": "Price variant prefix ID by default. When expand=price_variant, returns a full PriceVariant object.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/PriceVariant"
+              }
+            ]
+          },
+          "order": {
+            "description": "Order prefix ID by default. When expand=order, returns a full Order object. Only present when invoice is paid.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Order"
+              }
+            ],
+            "nullable": true
           },
           "created_at": {
             "type": "string",
@@ -3334,6 +4265,260 @@
           }
         }
       },
+      "InvoiceRequest": {
+        "type": "object",
+        "required": [
+          "invoice"
+        ],
+        "properties": {
+          "invoice": {
+            "type": "object",
+            "required": [
+              "price_variant",
+              "due_at"
+            ],
+            "properties": {
+              "price_variant": {
+                "type": "string",
+                "description": "Price variant prefix ID"
+              },
+              "customer": {
+                "type": "string",
+                "description": "Existing customer prefix ID (provide this OR customer_name + email_address)"
+              },
+              "customer_name": {
+                "type": "string",
+                "description": "Customer name (required if no customer prefix ID)"
+              },
+              "email_address": {
+                "type": "string",
+                "format": "email",
+                "description": "Customer email (required if no customer prefix ID)"
+              },
+              "due_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Payment due date (must be in the future)"
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional invoice description (max 500 characters)"
+              },
+              "charge_buyer_fee": {
+                "type": "boolean",
+                "description": "Whether the buyer pays the platform fee",
+                "default": true
+              }
+            }
+          }
+        }
+      },
+      "ProductRequest": {
+        "type": "object",
+        "required": [
+          "product"
+        ],
+        "properties": {
+          "product": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Product name"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "active",
+                  "archived"
+                ],
+                "description": "Product status (defaults to draft)"
+              },
+              "description": {
+                "type": "string",
+                "description": "Short product description"
+              },
+              "body_html": {
+                "type": "string",
+                "description": "HTML body content for the product page"
+              },
+              "slug": {
+                "type": "string",
+                "description": "URL slug (auto-generated from name if not provided)"
+              },
+              "button_cta": {
+                "type": "string",
+                "description": "Call-to-action button text (defaults to \"Get Started\")"
+              },
+              "available_from": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Product availability start date"
+              },
+              "available_until": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Product availability end date"
+              },
+              "tax_code": {
+                "type": "string",
+                "description": "Tax code for the product"
+              }
+            }
+          }
+        }
+      },
+      "PriceVariantRequest": {
+        "type": "object",
+        "required": [
+          "price_variant"
+        ],
+        "properties": {
+          "price_variant": {
+            "type": "object",
+            "required": [
+              "product",
+              "name",
+              "amount",
+              "currency"
+            ],
+            "properties": {
+              "product": {
+                "type": "string",
+                "description": "Product prefix ID"
+              },
+              "name": {
+                "type": "string",
+                "description": "Price variant name"
+              },
+              "amount": {
+                "type": "integer",
+                "description": "Price in cents"
+              },
+              "amount_type": {
+                "type": "string",
+                "description": "Pricing model (e.g., fixed, pay_what_you_want)"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Three-letter ISO currency code (e.g., \"usd\")"
+              },
+              "billing_type": {
+                "type": "string",
+                "enum": [
+                  "one_time",
+                  "subscription",
+                  "free"
+                ],
+                "description": "Billing type"
+              },
+              "recurring_interval": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "week",
+                  "month",
+                  "year"
+                ],
+                "description": "Billing interval for subscriptions"
+              },
+              "interval_count": {
+                "type": "integer",
+                "description": "Number of intervals between billings"
+              },
+              "trial_period_days": {
+                "type": "integer",
+                "description": "Free trial period in days"
+              },
+              "revoke_after_days": {
+                "type": "integer",
+                "description": "Days after which access is revoked"
+              },
+              "quantity_available": {
+                "type": "integer",
+                "description": "Inventory limit (null for unlimited)"
+              },
+              "waitlist": {
+                "type": "boolean",
+                "description": "Whether to enable waitlist when sold out"
+              },
+              "hidden": {
+                "type": "boolean",
+                "description": "Whether to hide from storefront"
+              }
+            }
+          }
+        }
+      },
+      "PriceVariantUpdateRequest": {
+        "type": "object",
+        "required": [
+          "price_variant"
+        ],
+        "properties": {
+          "price_variant": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "integer",
+                "description": "Price in cents"
+              },
+              "amount_type": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "billing_type": {
+                "type": "string",
+                "enum": [
+                  "one_time",
+                  "subscription",
+                  "free"
+                ]
+              },
+              "recurring_interval": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "week",
+                  "month",
+                  "year"
+                ]
+              },
+              "interval_count": {
+                "type": "integer"
+              },
+              "trial_period_days": {
+                "type": "integer"
+              },
+              "revoke_after_days": {
+                "type": "integer"
+              },
+              "quantity_available": {
+                "type": "integer"
+              },
+              "waitlist": {
+                "type": "boolean"
+              },
+              "archived": {
+                "type": "boolean",
+                "description": "Set to true to archive the price variant"
+              },
+              "hidden": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
       "CheckoutLinkRequest": {
         "type": "object",
         "required": [
@@ -3564,6 +4749,14 @@
     {
       "name": "Discounts",
       "description": "Discount code management"
+    },
+    {
+      "name": "Invoices",
+      "description": "Invoice creation, payment, and lifecycle management"
+    },
+    {
+      "name": "Subscriptions",
+      "description": "Subscription lifecycle management (cancel, pause, resume)"
     },
     {
       "name": "CheckoutLinks",

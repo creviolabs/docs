@@ -3,7 +3,7 @@ title: "API reference"
 description: "Programmatically manage your Crevio storefront"
 ---
 
-The Crevio API lets you manage products, pricing, checkouts, orders, customers, and more. All endpoints return JSON with snake_case keys following Stripe conventions.
+The Crevio API lets you manage products, pricing, checkouts, orders, customers, invoices, subscriptions, and more. All endpoints return JSON with snake_case keys following Stripe conventions.
 
 ## Base URL
 
@@ -45,7 +45,7 @@ Every API resource includes an `object` field that identifies the resource type:
 }
 ```
 
-All IDs are string prefix IDs (e.g., `prod_abc123`, `pv_def456`, `cust_ghi789`).
+All IDs are string prefix IDs (e.g., `prod_abc123`, `price_def456`, `cus_ghi789`).
 
 ## List responses
 

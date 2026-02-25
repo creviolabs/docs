@@ -7,9 +7,12 @@ The Crevio API lets you programmatically manage your account's products, orders,
 
 ## What you can do with the API
 
-- **Products** — List and retrieve products and price variants.
+- **Products** — Create, update, delete, list, and retrieve products.
+- **Price variants** — Create, update, archive, list, and retrieve price variants for products.
 - **Orders** — List and retrieve order details with expandable line items and customers.
 - **Customers** — List, create, update, and retrieve customer records.
+- **Subscriptions** — List and retrieve subscriptions. Cancel, pause, or resume active subscriptions.
+- **Invoices** — Create, list, retrieve, void, and pay invoices.
 - **Checkouts** — Create checkout sessions and retrieve checkout details.
 - **Carts** — Create and manage shopping carts.
 - **Checkout links** — Create and manage shareable checkout links.
@@ -96,11 +99,17 @@ All resource IDs are string prefix IDs that encode the resource type:
 |----------|--------|---------|
 | Account | `acct_` | `acct_abc123` |
 | Product | `prod_` | `prod_abc123` |
-| Price Variant | `pv_` | `pv_abc123` |
+| Price Variant | `price_` | `price_abc123` |
 | Order | `ord_` | `ord_abc123` |
-| Customer | `cust_` | `cust_abc123` |
+| Customer | `cus_` | `cus_abc123` |
 | Checkout | `co_` | `co_abc123` |
+| Checkout Link | `cl_` | `cl_abc123` |
+| Invoice | `inv_` | `inv_abc123` |
+| Subscription | `sub_` | `sub_abc123` |
 | Discount | `disc_` | `disc_abc123` |
+| Cart | `cart_` | `cart_abc123` |
+| Webhook Endpoint | `wh_` | `wh_abc123` |
+| Review | `rev_` | `rev_abc123` |
 
 ### Object type discriminator
 
