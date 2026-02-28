@@ -116,7 +116,10 @@
 							},
 							{
 								"group": "Integrations",
-								"pages": ["developer/guides/webhooks"]
+								"pages": [
+									"developer/guides/webhooks",
+									"developer/guides/mcp"
+								]
 							}
 						]
 					},
