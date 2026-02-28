@@ -116,10 +116,7 @@
 							},
 							{
 								"group": "Integrations",
-								"pages": [
-									"developer/guides/webhooks",
-									"developer/guides/mcp"
-								]
+								"pages": ["developer/guides/webhooks", "developer/guides/mcp"]
 							}
 						]
 					},
@@ -162,6 +159,11 @@
 	},
 	"contextual": {
 		"options": ["copy", "view", "chatgpt", "claude", "cursor", "vscode"]
+	},
+	"seo": {
+		"metatags": {
+			"canonical": "https://docs.crevio.co"
+		}
 	},
 	"footer": {
 		"socials": {
