@@ -1,26 +1,24 @@
 ---
-title: "MCP Server (Code Mode)"
+title: "MCP Server"
 description: "Connect AI agents to your Crevio account using the Model Context Protocol"
 ---
 
-The Crevio MCP server lets AI agents — like Claude, Cursor, or custom LLM workflows — manage your store through natural language. It uses a **Code Mode** architecture: instead of exposing every API endpoint as a separate tool, the server provides just two tools that let agents discover and execute any operation programmatically.
-
-This is the same pattern [pioneered by Cloudflare](https://blog.cloudflare.com/code-mode-mcp/) to solve the token explosion problem with large APIs. Two tools, full API coverage, minimal context usage.
+The Crevio MCP server lets AI agents — like Claude, Cursor, or custom LLM workflows — manage your store through natural language. It exposes two tools: one to discover available API endpoints, and one to execute them. Two tools, full API coverage, minimal context usage.
 
 ## What is MCP?
 
 [Model Context Protocol (MCP)](https://modelcontextprotocol.io) is an open standard that gives AI assistants a way to connect to external tools and data sources. Instead of manually writing API calls, an AI agent discovers and invokes your Crevio API through MCP — using natural language.
 
-## How Code Mode works
+## How it works
 
 Traditional MCP servers expose one tool per API endpoint. This works for small APIs, but quickly becomes impractical — each tool definition consumes tokens in the AI model's context window.
 
-Code Mode takes a different approach. The entire API specification lives **server-side**, and agents interact with it through code:
+Crevio takes a different approach with just two tools:
 
-1. **`search`** — The agent writes code to query the OpenAPI spec and find relevant endpoints
-2. **`execute`** — The agent writes code to call those endpoints using an authenticated `api` object
+1. **`search`** — The agent queries the OpenAPI spec with keywords to find relevant endpoints and their parameters
+2. **`execute`** — The agent calls those endpoints by specifying an HTTP method, path, and optional parameters
 
-The agent never sees the full API spec. It discovers only what it needs, keeps context lean, and can chain multiple API calls in a single tool invocation.
+The agent never sees the full API spec. It discovers only what it needs, keeps context lean, and gets the same responses as the [REST API](/developer/guides/api-overview).
 
 ## Base URL
 
@@ -49,63 +47,73 @@ curl -X POST https://mcp.crevio.co/mcp \
 
 ### `search` — Discover API endpoints
 
-A **read-only** tool for exploring the Crevio OpenAPI specification. The agent writes Ruby code against a `spec` object that holds the full spec with all `$ref`s pre-resolved.
+A **read-only, idempotent** tool for exploring the Crevio API. Pass a keyword query to find matching endpoints:
 
-**`spec.search(query)`** — Find endpoints by keyword:
-
-```ruby
-spec.search("products")
-# => [{method: "GET", path: "/products", summary: "List all products", ...},
-#     {method: "POST", path: "/products", summary: "Create a product", ...}, ...]
+```json
+{
+  "name": "search",
+  "arguments": { "query": "products" }
+}
 ```
 
-**`spec.full`** — All operations grouped by tag:
+Returns matching endpoints with method, path, summary, parameters, and request body schemas:
 
-```ruby
-spec.full
-# => {"Products" => [...], "Orders" => [...], "Customers" => [...], ...}
+```json
+[
+  { "method": "GET", "path": "/products", "summary": "List products", ... },
+  { "method": "POST", "path": "/products", "summary": "Create product", ... },
+  { "method": "GET", "path": "/products/{prefix_id}", "summary": "Get product details", ... }
+]
 ```
 
-**`spec.paths`** — Direct access to the raw OpenAPI paths object:
-
-```ruby
-# Inspect the POST /products request body schema
-spec.paths["/products"]["post"]["requestBody"]
-```
+Pass an empty query to list all 59 available endpoints.
 
 ### `execute` — Run API operations
 
-Executes Ruby code against your account. The tool provides two objects:
+Executes an authenticated API call against your account. Specify an HTTP method, path, and optional parameters:
 
-- **`api`** — An authenticated client with REST verbs (`get`, `post`, `patch`, `delete`). All paths are relative to `/v1`.
-- **`spec`** — The same spec object from `search`, available here too for inline discovery.
-
-```ruby
-# List products
-api.get("/products")
-
-# Create a product
-api.post("/products", product: { name: "My Course", product_type: "course" })
-
-# Update a product
-api.patch("/products/prod_abc123", product: { name: "Updated Name" })
-
-# Delete a product
-api.delete("/products/prod_abc123")
+```json
+{
+  "name": "execute",
+  "arguments": {
+    "method": "get",
+    "path": "/products"
+  }
+}
 ```
 
-The `api` object dispatches requests through the **same API controllers** as `api.crevio.co` — all authorization, validation, and rate limiting apply. Responses match the [REST API format](/developer/guides/api-overview#conventions) exactly.
+Paths are automatically prefixed with `/v1`. Parameters are sent as query params for `GET`/`DELETE` and as a JSON body for `POST`/`PATCH`:
 
-#### Chaining multiple calls
-
-Because `execute` runs arbitrary code, agents can do in **one tool call** what would normally take many:
-
-```ruby
-# Get all products, then fetch orders for the most expensive one
-products = api.get("/products")
-top = products["data"].max_by { |p| p["price_variants"]&.first&.dig("amount") || 0 }
-api.get("/orders", product_id: top["id"], limit: 5)
+```json
+{
+  "name": "execute",
+  "arguments": {
+    "method": "post",
+    "path": "/products",
+    "params": {
+      "product": { "name": "My Course", "product_type": "course" }
+    }
+  }
+}
 ```
+
+More examples:
+
+```json
+// Update a product
+{ "method": "patch", "path": "/products/prod_abc123", "params": { "product": { "name": "Updated Name" } } }
+
+// Delete a product
+{ "method": "delete", "path": "/products/prod_abc123" }
+
+// List orders
+{ "method": "get", "path": "/orders" }
+
+// Create a discount
+{ "method": "post", "path": "/discounts", "params": { "discount": { "code": "SUMMER20", "discount_type": "percent_off", "percent_off": 20 } } }
+```
+
+The `execute` tool dispatches requests through the **same API controllers** as `api.crevio.co` — all authorization, validation, and rate limiting apply. Responses match the [REST API format](/developer/guides/api-overview#conventions) exactly.
 
 ## Connecting to Claude Desktop
 
@@ -151,21 +159,27 @@ When you ask *"Create a buy-one-get-one discount for my course"*, here's what ha
 
 <Steps>
   <Step title="Discover relevant endpoints">
-    The agent calls `search` with code like `spec.search("discount")` to find the discount creation endpoint and its required parameters.
+    The agent calls `search` with `{"query": "discount"}` to find the discount creation endpoint and its required parameters.
   </Step>
   <Step title="Find the product">
-    The agent calls `execute` with `api.get("/products")` to list products and identify the course.
+    The agent calls `execute` with `{"method": "get", "path": "/products"}` to list products and identify the course.
   </Step>
   <Step title="Create the discount">
-    The agent calls `execute` with a chained operation:
-    ```ruby
-    api.post("/discounts", discount: {
-      code: "BOGO",
-      discount_type: "percent_off",
-      percent_off: 100,
-      duration: "once",
-      applies_to_product_ids: ["prod_abc123"]
-    })
+    The agent calls `execute` to create the discount:
+    ```json
+    {
+      "method": "post",
+      "path": "/discounts",
+      "params": {
+        "discount": {
+          "code": "BOGO",
+          "discount_type": "percent_off",
+          "percent_off": 100,
+          "duration": "once",
+          "applies_to_product_ids": ["prod_abc123"]
+        }
+      }
+    }
     ```
   </Step>
   <Step title="Confirm the result">
@@ -181,30 +195,23 @@ Everything accessible through the [REST API](/developer/guides/api-overview#what
 
 | Category | Operations |
 |----------|-----------|
+| **Account** | Retrieve account details |
 | **Products** | Create, update, delete, list, retrieve |
-| **Price variants** | Create, update, archive, list, retrieve |
-| **Orders** | List, retrieve with expanded line items |
+| **Price variants** | Create, update, list, retrieve |
+| **Orders** | List, retrieve |
 | **Customers** | List, create, update, retrieve |
 | **Subscriptions** | List, retrieve, cancel, pause, resume |
-| **Checkouts** | Create sessions, retrieve details |
-| **Discounts** | Create, update, manage codes |
-| **Blog posts** | List, retrieve published content |
+| **Checkouts** | Create sessions, retrieve, update |
+| **Carts** | Create, retrieve, update, delete |
+| **Discounts** | Create, update, delete, list, retrieve |
+| **Checkout links** | Create, update, delete, list, retrieve |
+| **Experiences** | List, retrieve |
+| **Blog posts** | List, retrieve |
 | **Invoices** | Create, list, retrieve, void, pay |
-| **Webhooks** | Create, update, manage subscriptions |
+| **Webhooks** | Create, update, delete, list, retrieve, test |
+| **Reviews** | List, retrieve |
+| **x402** | Get and update configuration |
 
 ## Security
 
-Code execution is **sandboxed** server-side. The sandbox blocks:
-
-- Filesystem access (`File`, `Dir`, `IO`)
-- Network calls (`Socket`, `Net::HTTP`, `URI`)
-- System commands (`system`, `exec`, backticks, `spawn`, `fork`)
-- Code loading (`require`, `load`, `autoload`)
-- Ruby internals (`eval`, `ObjectSpace`, `ENV`, `Process`, `Kernel`)
-- Metaprogramming (`define_method`, `const_get`, `instance_eval`)
-
-Execution has a **10-second timeout** and **50KB output limit**. All operations run within your account's tenant boundary — the same multi-tenant isolation as the REST API.
-
-<Note>
-  The MCP server dispatches requests through the same API controllers as `api.crevio.co`. No special code paths — the agent gets the same behavior, validation, and error messages as direct API calls.
-</Note>
+All operations run within your account's tenant boundary — the same multi-tenant isolation as the REST API. The MCP server dispatches requests through the same API controllers as `api.crevio.co`. No special code paths — the agent gets the same behavior, validation, and error messages as direct API calls.
