@@ -170,5 +170,10 @@
 			"x": "https://x.com/crevioapp",
 			"github": "https://github.com/creviolabs"
 		}
-	}
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-8LD266J5HX"
+    }
+  }
 }
