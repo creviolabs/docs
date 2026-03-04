@@ -2669,6 +2669,37 @@
         }
       }
     },
+    "/me": {
+      "get": {
+        "summary": "Get current user profile",
+        "description": "Returns the authenticated user's profile data including their roles in the current account",
+        "operationId": "getMe",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "Me"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
     "/x402_configuration": {
       "get": {
         "summary": "Get x402 configuration",
@@ -3073,6 +3104,35 @@
             "enum": [
               true
             ]
+          }
+        }
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (e.g., \"user_abc123\")"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "user"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "roles": {
+            "type": "array",
+            "description": "User's roles in the current account (e.g., owner, admin, member)",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -4714,6 +4774,10 @@
     }
   ],
   "tags": [
+    {
+      "name": "Me",
+      "description": "Current user profile"
+    },
     {
       "name": "Account",
       "description": "Current account information"
