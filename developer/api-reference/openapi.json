@@ -1041,6 +1041,53 @@
         }
       }
     },
+    "/order_items/{prefix_id}": {
+      "get": {
+        "summary": "Get order item",
+        "description": "Returns details of a specific order item",
+        "operationId": "getOrderItem",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "Order Items"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrefixId"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "description": "Comma-separated relations to expand: order, price_variant, product",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order item details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/customers": {
       "get": {
         "summary": "List customers",
@@ -3454,25 +3501,54 @@
           }
         }
       },
-      "OrderLineItem": {
+      "OrderItem": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (oi_*)"
+          },
           "object": {
             "type": "string",
             "enum": [
-              "order_line_item"
+              "order_item"
             ]
           },
           "quantity": {
             "type": "integer"
           },
+          "order": {
+            "description": "Order prefix ID by default. When expand=order, returns a full Order object.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Order"
+              }
+            ]
+          },
           "price_variant": {
-            "type": "string",
-            "description": "Price variant prefix ID"
+            "description": "Price variant prefix ID by default. When expand=price_variant, returns a full PriceVariant object.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/PriceVariant"
+              }
+            ]
           },
           "product": {
-            "type": "string",
-            "description": "Product prefix ID"
+            "description": "Product prefix ID by default. When expand=product, returns a full Product object.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
           }
         }
       },
@@ -3521,7 +3597,7 @@
             "type": "array",
             "description": "Only included when expand=line_items",
             "items": {
-              "$ref": "#/components/schemas/OrderLineItem"
+              "$ref": "#/components/schemas/OrderItem"
             }
           },
           "checkout": {
