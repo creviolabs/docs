@@ -2250,10 +2250,10 @@
             "schema": {
               "type": "string",
               "enum": [
-                "OPEN",
-                "PAID",
-                "PAST_DUE",
-                "VOID"
+                "open",
+                "paid",
+                "past_due",
+                "void"
               ]
             }
           },
@@ -3687,10 +3687,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "OPEN",
-              "PAID",
-              "PAST_DUE",
-              "VOID"
+              "open",
+              "paid",
+              "past_due",
+              "void"
             ]
           },
           "number": {
