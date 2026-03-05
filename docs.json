@@ -71,7 +71,7 @@
 							},
 							{
 								"group": "Advanced",
-								"pages": ["integrations/custom-domain"]
+								"pages": ["integrations/custom-domain", "integrations/email-domain"]
 							}
 						]
 					},

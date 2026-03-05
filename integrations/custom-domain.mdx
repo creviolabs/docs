@@ -1,11 +1,15 @@
 ---
 title: "Custom domains"
-description: "Serve your Crevio storefront from your own domain for a fully branded experience."
+description: "Serve your Crevio storefront from your own domain and send emails from your own email domain."
 ---
 
-Every Crevio account gets a free subdomain at `yourname.crevio.site`. If you want your storefront to live on your own domain (e.g., `shop.yourbrand.com`), you can connect a custom domain in a few minutes.
+Every Crevio account gets a free subdomain at `yourname.crevio.site` and a default outbound email address at `yourname@outbound.crevio.co`. You can customize both by connecting your own storefront domain and [email domain](/integrations/email-domain).
 
-## Why use a custom domain
+## Storefront custom domain
+
+A storefront custom domain lets your store live on your own URL (e.g., `shop.yourbrand.com`) instead of `yourname.crevio.site`.
+
+### Why use a custom domain
 
 - **Branding** -- Your storefront URL matches your brand instead of showing `crevio.site`.
 - **SEO** -- Search engines treat your domain as part of your own web presence, building domain authority for your brand rather than Crevio's.
@@ -116,3 +120,7 @@ SSL certificates are provisioned **automatically** for your custom domain. You d
     Go to **Settings** > **Custom Domain**, remove the current domain, and add the new one. Update your DNS records accordingly. The old domain will stop serving your storefront once removed.
   </Accordion>
 </AccordionGroup>
+
+## Email domain
+
+You can also send outbound emails from your own domain instead of `@outbound.crevio.co`. See the [Email domain](/integrations/email-domain) guide for setup instructions.

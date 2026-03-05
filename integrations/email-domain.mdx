@@ -1,0 +1,100 @@
+---
+title: "Email domain"
+description: "Send outbound emails from your own domain instead of the default Crevio address."
+---
+
+By default, Crevio sends outbound emails (order confirmations, receipts, etc.) from `yoursubdomain@outbound.crevio.co`. You can verify your own domain to send from a professional address like `hello@yourbrand.com`.
+
+## Why use a custom email domain
+
+- **Branding** -- Emails come from your domain, not `outbound.crevio.co`.
+- **Deliverability** -- Emails from a verified domain with proper DNS records are less likely to land in spam.
+- **Trust** -- Customers recognize your brand in their inbox.
+
+## Default outbound email
+
+Every account automatically gets a default outbound email address based on your subdomain:
+
+```
+yoursubdomain@outbound.crevio.co
+```
+
+This address is used for all outbound emails until you verify a custom email domain.
+
+## Setting up an email domain
+
+<Steps>
+  <Step title="Go to Custom Domain settings">
+    In your dashboard, navigate to **Settings** > **Custom Domain**. Scroll down to the **Email domain** section.
+  </Step>
+  <Step title="Enter your domain">
+    Type the domain you want to send emails from (e.g., `yourbrand.com`). Click **Verify domain**.
+  </Step>
+  <Step title="Configure DNS records">
+    Crevio displays a set of DNS records that you need to add at your domain registrar or DNS provider. These typically include SPF, DKIM, and DMARC records.
+  </Step>
+  <Step title="Wait for verification">
+    Crevio polls your DNS records automatically. Once all records are verified, your email domain becomes active.
+  </Step>
+  <Step title="Set your from address">
+    After verification, a **From address** field appears. Enter the email address you want to send from (e.g., `hello@yourbrand.com`). The address must use the verified domain.
+  </Step>
+</Steps>
+
+## DNS records
+
+After adding your domain, Crevio shows the required DNS records. You need to add all of them at your DNS provider:
+
+| Record type | Purpose |
+|------------|---------|
+| **SPF** | Authorizes Crevio to send emails on behalf of your domain. |
+| **DKIM** | Adds a cryptographic signature so recipients can verify emails are authentic. |
+| **DMARC** | Tells receiving mail servers how to handle emails that fail SPF or DKIM checks. |
+
+<Tip>
+  Add all DNS records before waiting for verification. Crevio checks all records together. Missing even one record will prevent verification.
+</Tip>
+
+## Verification status
+
+| Status | What it means |
+|--------|--------------|
+| **Pending** | Crevio is waiting for your DNS records to propagate. This can take a few minutes to several hours. |
+| **Verified** | All DNS records are confirmed. You can now send emails from your domain. |
+| **Error** | One or more DNS records are missing or incorrect. Check your DNS configuration and try again. |
+
+## From address
+
+Once your domain is verified, you can configure which email address to send from. The address must use the verified domain:
+
+- `hello@yourbrand.com`
+- `support@yourbrand.com`
+- `noreply@yourbrand.com`
+
+If you do not set a from address, Crevio continues using the default `yoursubdomain@outbound.crevio.co`.
+
+## Removing an email domain
+
+To remove your email domain, click **Remove domain** in the email domain settings. This:
+
+- Reverts outbound emails to the default `yoursubdomain@outbound.crevio.co` address
+- Clears the from address setting
+- Removes the domain from Crevio's email provider
+
+<Note>
+  Removing the email domain does not delete the DNS records from your domain registrar. You can clean those up manually if you no longer need them.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="My email domain is stuck in 'Pending'">
+    Verify that all required DNS records (SPF, DKIM, DMARC) are correctly added at your DNS provider. Use a tool like [MXToolbox](https://mxtoolbox.com) to check if records have propagated. Some DNS providers can take up to 48 hours to propagate changes.
+  </Accordion>
+  <Accordion title="Emails are still coming from outbound.crevio.co">
+    Make sure your email domain status is **Verified** and you have set a **From address** in the email domain settings. Both are required for emails to send from your domain.
+  </Accordion>
+  <Accordion title="I get a 'domain mismatch' error when setting the from address">
+    The from address must use the exact domain you verified. For example, if you verified `yourbrand.com`, the from address must end with `@yourbrand.com`. Subdomains like `@mail.yourbrand.com` will not work unless you verify `mail.yourbrand.com` as the email domain.
+  </Accordion>
+</AccordionGroup>
