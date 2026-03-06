@@ -2747,6 +2747,264 @@
         }
       }
     },
+    "/files": {
+      "get": {
+        "summary": "List files",
+        "description": "Returns a list of files for the current account. Supports filtering by source_type.",
+        "operationId": "listFiles",
+        "x-speakeasy-name-override": "list",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StartingAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "name": "source_type",
+            "in": "query",
+            "description": "Filter by source type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "upload",
+                "external"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_File"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create file",
+        "description": "Create a new file record. For uploads, only a filename is required — a presigned URL is returned for direct upload to S3. For external URLs (YouTube, Vimeo, Wistia), pass source_type \"external\" with a url.\n\n**Upload flow:**\n1. Call this endpoint with `{\"file\": {\"filename\": \"photo.png\"}}`\n2. PUT your file binary to the returned `upload_url` with the provided `upload_headers`\n3. Call `POST /v1/files/{id}/uploaded` to confirm the upload and transition to `ready`",
+        "operationId": "createFile",
+        "x-speakeasy-name-override": "create",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "object",
+                    "properties": {
+                      "filename": {
+                        "type": "string",
+                        "description": "The name of the file including its extension (e.g., \"photo.png\"). Required for uploads."
+                      },
+                      "source_type": {
+                        "type": "string",
+                        "enum": [
+                          "upload",
+                          "external"
+                        ],
+                        "description": "Type of file. Defaults to \"upload\" if omitted."
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "URL for external media (YouTube, Vimeo, Wistia). Required when source_type is \"external\"."
+                      }
+                    },
+                    "required": [
+                      "filename"
+                    ]
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCreateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "summary": "Get file",
+        "description": "Returns a single file by its prefix ID",
+        "operationId": "getFile",
+        "x-speakeasy-name-override": "get",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "File prefix ID (e.g., \"file_abc123\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete file",
+        "description": "Deletes a file and its associated storage object",
+        "operationId": "deleteFile",
+        "x-speakeasy-name-override": "delete",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "File prefix ID (e.g., \"file_abc123\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/files/{id}/uploaded": {
+      "post": {
+        "summary": "Confirm file upload",
+        "description": "Call this after uploading the file binary to the presigned URL. Verifies the file exists in storage, updates metadata (size, checksum), and transitions upload_status from \"pending\" to \"ready\".",
+        "operationId": "confirmFileUpload",
+        "x-speakeasy-name-override": "confirmUpload",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "File prefix ID (e.g., \"file_abc123\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload confirmed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
     "/x402_configuration": {
       "get": {
         "summary": "Get x402 configuration",
@@ -3136,6 +3394,125 @@
             "type": "string"
           }
         }
+      },
+      "ListResponse_File": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": [
+              "list"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prefix ID (e.g., \"file_abc123\")"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "file"
+            ]
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "upload",
+              "external"
+            ],
+            "description": "Whether the file was uploaded or is an external URL"
+          },
+          "upload_status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "processing",
+              "ready",
+              "failed"
+            ],
+            "description": "Current upload status. Uploads start as \"pending\" until confirmed via /uploaded."
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "description": "External URL (for source_type \"external\")"
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true,
+            "description": "Original filename including extension"
+          },
+          "content_type": {
+            "type": "string",
+            "nullable": true,
+            "description": "MIME type (e.g., \"image/png\", \"video/mp4\")"
+          },
+          "size": {
+            "type": "integer",
+            "nullable": true,
+            "description": "File size in bytes. Null while upload_status is \"pending\"."
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true,
+            "description": "Detected provider for external URLs (youtube, vimeo, wistia)"
+          },
+          "file_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "CDN URL for accessing the uploaded file"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FileCreateResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/File"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "upload_url": {
+                "type": "string",
+                "nullable": true,
+                "description": "Presigned URL to PUT the file binary to. Only present for upload source_type."
+              },
+              "upload_headers": {
+                "type": "object",
+                "nullable": true,
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Headers to include when uploading to the presigned URL"
+              }
+            }
+          }
+        ]
       },
       "DeleteResponse": {
         "type": "object",
@@ -4909,6 +5286,10 @@
     {
       "name": "BlogPosts",
       "description": "Blog content management"
+    },
+    {
+      "name": "Files",
+      "description": "File uploads and external media management"
     },
     {
       "name": "WebhookEndpoints",
